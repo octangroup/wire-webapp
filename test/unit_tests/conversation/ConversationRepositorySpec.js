@@ -17,6 +17,10 @@
  *
  */
 
+import sinon from 'sinon';
+import ko from 'knockout';
+import {amplify} from 'amplify';
+
 import {ConnectionStatus} from '@wireapp/api-client/dist/connection';
 import {GenericMessage, LegalHoldStatus, Text} from '@wireapp/protocol-messaging';
 
@@ -51,10 +55,12 @@ import {File} from 'src/script/entity/message/File';
 
 import {ConnectionEntity} from 'src/script/connection/ConnectionEntity';
 import {MessageCategory} from 'src/script/message/MessageCategory';
-import {UserGenerator} from '../../helper/UserGenerator';
 import {Config} from 'src/script/Config';
-import {TestFactory} from '../../helper/TestFactory';
 import {ConversationError} from 'src/script/error/ConversationError';
+
+import {UserGenerator} from '../../helper/UserGenerator';
+import {TestFactory} from '../../helper/TestFactory';
+import {entities, payload} from '../../api/payloads';
 
 describe('ConversationRepository', () => {
   const testFactory = new TestFactory();
@@ -87,7 +93,7 @@ describe('ConversationRepository', () => {
   beforeEach(() => {
     server = sinon.fakeServer.create();
     server.autoRespond = true;
-    sinon.spy(jQuery, 'ajax');
+    sinon.spy($, 'ajax');
 
     return testFactory.exposeConversationActors().then(conversation_repository => {
       amplify.publish(WebAppEvents.EVENT.NOTIFICATION_HANDLING_STATE, NOTIFICATION_HANDLING_STATE.WEB_SOCKET);
@@ -120,7 +126,7 @@ describe('ConversationRepository', () => {
   afterEach(() => {
     server.restore();
     storage_service.clearStores();
-    jQuery.ajax.restore();
+    $.ajax.restore();
     testFactory.conversation_repository.conversations.removeAll();
   });
 

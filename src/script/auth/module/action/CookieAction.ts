@@ -45,7 +45,7 @@ export class CookieAction {
       try {
         const timerId = getState().cookieState.cookieTimer[name];
         if (timerId) {
-          clearTimeout(timerId);
+          window.clearTimeout(timerId);
           dispatch(CookieActionCreator.stopCookiePolling({name, timerId}));
         }
       } catch (error) {

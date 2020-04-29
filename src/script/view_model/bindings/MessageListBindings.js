@@ -57,12 +57,12 @@ ko.bindingHandlers.focus_on_keydown = {
             const keyboard_event = jquery_event.originalEvent || jquery_event;
             // check for activeElement needed, cause in IE11 i could be undefined under some circumstances
             const active_element_is_input =
-              document.activeElement && ['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName);
+              window.document.activeElement && ['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName);
             const is_arrow_key = isArrowKey(keyboard_event);
             const is_pageupdown_key = isPageUpDownKey(keyboard_event);
 
             if (is_pageupdown_key) {
-              document.activeElement.blur();
+              window.document.activeElement.blur();
             } else if (!active_element_is_input && !is_arrow_key) {
               if (!isMetaKey(keyboard_event) || isPasteAction(keyboard_event)) {
                 element.focus();
@@ -84,7 +84,7 @@ ko.bindingHandlers.focus_on_keydown = {
 ko.bindingHandlers.showAllTimestamps = {
   init(element) {
     const toggleShowTimeStamp = force => {
-      const times = document.querySelectorAll('.time');
+      const times = window.document.querySelectorAll('.time');
       times.forEach(time => time.classList.toggle('show-timestamp', force));
     };
 

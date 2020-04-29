@@ -17,6 +17,8 @@
  *
  */
 
+import ko from 'knockout';
+
 import {KEY, isOneOfKeys, isEnterKey, isEscapeKey} from 'Util/KeyboardUtil';
 
 const _addListeners = () => {
@@ -45,7 +47,7 @@ const _onKeyDown = keyboardEvent => {
 };
 
 const _onMouseDown = event => {
-  const entry = document.querySelector('.ctx-menu');
+  const entry = window.document.querySelector('.ctx-menu');
   const shouldCloseMenu = entry && !entry.contains(event.target);
   if (shouldCloseMenu) {
     _cleanup();
@@ -56,7 +58,7 @@ const _onWheel = event => event.preventDefault();
 
 const _rotateItem = key => {
   const entries = Array.from(document.querySelectorAll('.ctx-menu-item'));
-  const entry = document.querySelector('.ctx-menu-item.selected');
+  const entry = window.document.querySelector('.ctx-menu-item.selected');
 
   if (entries.length) {
     if (!entry) {
@@ -81,7 +83,7 @@ const _removeListeners = () => {
 };
 
 const _triggerItem = () => {
-  const entry = document.querySelector('.ctx-menu-item.selected');
+  const entry = window.document.querySelector('.ctx-menu-item.selected');
   if (entry) {
     entry.click();
   }
@@ -93,11 +95,11 @@ const _cleanup = () => {
 };
 
 const _build = (entries, defaultIdentifier) => {
-  const menu = document.createElement('div');
+  const menu = window.document.createElement('div');
   menu.classList.add('ctx-menu');
 
   entries.forEach(({title, label, click, identifier, icon, isSeparator, isDisabled, isChecked}) => {
-    const element = document.createElement('div');
+    const element = window.document.createElement('div');
     if (isSeparator) {
       element.classList.add('ctx-menu-separator');
       return menu.appendChild(element);
@@ -105,7 +107,7 @@ const _build = (entries, defaultIdentifier) => {
     element.setAttribute('data-uie-name', identifier || defaultIdentifier || 'ctx-menu-item');
     element.setAttribute('title', title || label || '');
     element.classList.add('ctx-menu-item');
-    const itemText = document.createElement('span');
+    const itemText = window.document.createElement('span');
     itemText.innerText = label;
     element.appendChild(itemText);
 
@@ -120,13 +122,13 @@ const _build = (entries, defaultIdentifier) => {
     };
 
     element.onmouseenter = () => {
-      const selectedEntry = document.querySelector('.ctx-menu-item.selected');
+      const selectedEntry = window.document.querySelector('.ctx-menu-item.selected');
       if (selectedEntry) {
         selectedEntry.classList.remove('selected');
       }
     };
     if (icon) {
-      const iconComponent = document.createElement(icon);
+      const iconComponent = window.document.createElement(icon);
       iconComponent.classList.add('ctx-menu-icon');
       ko.applyBindingsToNode(iconComponent, {component: icon});
       element.prepend(iconComponent);
@@ -134,7 +136,7 @@ const _build = (entries, defaultIdentifier) => {
 
     if (isChecked) {
       element.classList.add('ctx-menu-item--checked');
-      const checkIcon = document.createElement('check-icon');
+      const checkIcon = window.document.createElement('check-icon');
       checkIcon.classList.add('ctx-menu-check');
       checkIcon.setAttribute('data-uie-name', 'ctx-menu-check');
       ko.applyBindingsToNode(checkIcon, {component: 'check-icon'});
@@ -167,7 +169,7 @@ export const Context = {
 
     const menu = _build(entries, identifier);
     menu.style.visibility = 'hidden';
-    document.body.appendChild(menu);
+    window.document.body.appendChild(menu);
 
     const menuWidth = menu.offsetWidth;
     const menuHeight = menu.offsetHeight;

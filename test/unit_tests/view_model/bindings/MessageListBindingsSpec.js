@@ -17,8 +17,6 @@
  *
  */
 
-import $ from 'jquery';
-
 import {bindHtml} from '../../../helper/knockoutHelpers';
 
 import 'src/script/view_model/bindings/MessageListBindings';
@@ -54,7 +52,7 @@ describe('messageListBindings', () => {
 
           scrollingElement.scrollTop = scrollTop;
           return new Promise(resolve => {
-            setTimeout(() => {
+            window.setTimeout(() => {
               expect(context.onInit).toHaveBeenCalledWith(scrollingElement);
               ['onHitBottom', 'onHitTop'].forEach(callback => {
                 if (expectedCalls.includes(callback)) {

@@ -43,7 +43,7 @@ export enum APPLOCK_STATE {
 const APP_LOCK_STORAGE = 'app_lock';
 
 const getTimeout = (queryName: string, configName: 'APPLOCK_SCHEDULED_TIMEOUT' | 'APPLOCK_UNFOCUS_TIMEOUT') => {
-  const queryTimeout = parseInt(getURLParameter(queryName), 10);
+  const queryTimeout = window.parseInt(getURLParameter(queryName), 10);
   const configTimeout = Config.getConfig().FEATURE && Config.getConfig().FEATURE[configName];
   const isNotFinite = (value: number) => !Number.isFinite(value);
   if (isNotFinite(queryTimeout) && isNotFinite(configTimeout)) {
@@ -96,7 +96,7 @@ export class AppLockViewModel {
     this.isVisible = ko.observable(false);
     this.isLoading = ko.observable(false);
     this.storageKey = ko.pureComputed(() => `${APP_LOCK_STORAGE}_${selfUser().id}`);
-    ko.applyBindings(this, document.getElementById('applock'));
+    ko.applyBindings(this, window.document.getElementById('applock'));
 
     this.isVisible.subscribe(isVisible => {
       const app: HTMLDivElement = window.document.querySelector('#app');
@@ -145,7 +145,7 @@ export class AppLockViewModel {
       }
     });
     this.modalObserver = new MutationObserver(() => {
-      const modalInDOM = document.querySelector('[data-uie-name="applock-modal"]');
+      const modalInDOM = window.document.querySelector('[data-uie-name="applock-modal"]');
       if (!modalInDOM) {
         amplify.publish(WebAppEvents.LIFECYCLE.SIGN_OUT, SIGN_OUT_REASON.USER_REQUESTED);
       }

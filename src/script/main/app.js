@@ -21,6 +21,7 @@
 import 'core-js/es7/reflect';
 
 import ko from 'knockout';
+import {amplify} from 'amplify';
 import platform from 'platform';
 import {container} from 'tsyringe';
 
@@ -554,7 +555,7 @@ class App {
           if (isAccessTokenError) {
             this.logger.error(`Could not get access token: ${error.message}. Logging out user.`, error);
           } else {
-            Raygun.send(error);
+            window.Raygun.send(error);
           }
 
           return this.logout(SIGN_OUT_REASON.APP_INIT);
@@ -899,7 +900,7 @@ class App {
   }
 
   /**
-   * Report call telemetry to Raygun for analysis.
+   * Report call telemetry towindow.Raygun for analysis.
    * @returns {undefined} No return value
    */
   reportCall() {
@@ -922,7 +923,7 @@ class App {
 $(async () => {
   enableLogging(Config.getConfig().FEATURE.ENABLE_DEBUG);
   exposeWrapperGlobals();
-  const appContainer = document.getElementById('wire-main');
+  const appContainer = window.document.getElementById('wire-main');
   if (appContainer) {
     const apiClient = container.resolve(APIClientSingleton).getClient();
     const backendClient = container.resolve(BackendClient);

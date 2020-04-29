@@ -17,6 +17,9 @@
  *
  */
 
+import ko from 'knockout';
+import {amplify} from 'amplify';
+
 import {iterateItem} from 'Util/ArrayUtil';
 import {KEY} from 'Util/KeyboardUtil';
 import {formatLocale} from 'Util/TimeUtil';
@@ -63,7 +66,7 @@ z.viewModel.ImageDetailViewViewModel = class ImageDetailViewViewModel {
 
     amplify.subscribe(WebAppEvents.CONVERSATION.DETAIL_VIEW.SHOW, this.show.bind(this));
 
-    ko.applyBindings(this, document.getElementById(this.elementId));
+    ko.applyBindings(this, window.document.getElementById(this.elementId));
   }
 
   beforeHideCallback() {

@@ -17,6 +17,7 @@
  *
  */
 
+import ko from 'knockout';
 import {amplify} from 'amplify';
 
 import {getLogger} from 'Util/Logger';
@@ -98,7 +99,7 @@ export class ModalsViewModel {
   };
 
   ready = () => {
-    ko.applyBindings(this, document.getElementById(this.elementId));
+    ko.applyBindings(this, window.document.getElementById(this.elementId));
     this.state(States.READY);
     this.unqueue();
   };

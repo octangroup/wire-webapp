@@ -17,6 +17,8 @@
  *
  */
 
+import {lorem_ipsum} from '../../api/payloads';
+
 import {
   bytesToHex,
   compareTransliteration,

@@ -17,6 +17,7 @@
  *
  */
 
+import {amplify} from 'amplify';
 import ko from 'knockout';
 
 import {t} from 'Util/LocalizerUtil';
@@ -33,7 +34,7 @@ export class LoadingViewModel {
     amplify.subscribe(WebAppEvents.APP.UPDATE_PROGRESS, this.updateProgress.bind(this));
 
     const elementId = 'loading-screen';
-    this.element = document.getElementById(elementId);
+    this.element = window.document.getElementById(elementId);
     ko.applyBindings(this, this.element);
   }
 

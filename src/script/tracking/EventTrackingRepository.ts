@@ -225,7 +225,7 @@ export class EventTrackingRepository {
   //##############################################################################
 
   /**
-   * Checks if a Raygun payload should be reported.
+   * Checks if awindow.Raygun payload should be reported.
    *
    * @see https://github.com/MindscapeHQ/raygun4js#onbeforesend
    * @param raygunPayload Error payload about to be send
@@ -247,14 +247,14 @@ export class EventTrackingRepository {
   }
 
   private _disableErrorReporting(): void {
-    this.logger.debug('Disabling Raygun error reporting');
+    this.logger.debug('Disablingwindow.Raygun error reporting');
     this.isErrorReportingActivated = false;
     window.Raygun.detach();
     window.Raygun.init(EventTrackingRepository.CONFIG.ERROR_REPORTING.API_KEY, {disableErrorTracking: true});
   }
 
   private _enableErrorReporting(): void {
-    this.logger.debug('Enabling Raygun error reporting');
+    this.logger.debug('Enablingwindow.Raygun error reporting');
     this.isErrorReportingActivated = true;
 
     const options = {
@@ -270,7 +270,7 @@ export class EventTrackingRepository {
     window.Raygun.disableAutoBreadcrumbs();
 
     /*
-     * Adding a version to the Raygun reports to identify which version of the WebApp ran into the issue.
+     * Adding a version to thewindow.Raygun reports to identify which version of the WebApp ran into the issue.
      * @note We cannot use our own version string as it has to be in a certain format
      * @see https://github.com/MindscapeHQ/raygun4js#version-filtering
      */

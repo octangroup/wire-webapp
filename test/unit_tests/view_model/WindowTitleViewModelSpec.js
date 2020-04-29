@@ -18,6 +18,7 @@
  */
 
 import ko from 'knockout';
+import {amplify} from 'amplify';
 
 import {t, setStrings} from 'Util/LocalizerUtil';
 import {createRandomUuid} from 'Util/util';

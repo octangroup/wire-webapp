@@ -31,7 +31,7 @@ export const getParameter = (parameterName: string, locationSearch = window.loca
     const isExpectedParameter = parameter === parameterName;
     if (isExpectedParameter) {
       if (value) {
-        const decodedValue = decodeURI(value);
+        const decodedValue = window.decodeURI(value);
 
         if (decodedValue === 'false') {
           return false;

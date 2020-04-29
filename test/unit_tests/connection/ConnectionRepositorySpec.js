@@ -17,14 +17,19 @@
  *
  */
 
+import {amplify} from 'amplify';
+import sinon from 'sinon';
 import {ConnectionStatus} from '@wireapp/api-client/dist/connection';
+
 import {createRandomUuid} from 'Util/util';
 import {Conversation} from 'src/script/entity/Conversation';
 import {User} from 'src/script/entity/User';
 import {WebAppEvents} from 'src/script/event/WebApp';
 import {ConnectionEntity} from 'src/script/connection/ConnectionEntity';
 import {Config} from 'src/script/Config';
+
 import {TestFactory} from '../../helper/TestFactory';
+import {entities, payload} from '../../api/payloads';
 
 describe('ConnectionRepository', () => {
   let server = undefined;

@@ -17,6 +17,8 @@
  *
  */
 
+import ko from 'knockout';
+import {amplify} from 'amplify';
 import {container} from 'tsyringe';
 import {escape} from 'underscore';
 import {Availability} from '@wireapp/protocol-messaging';

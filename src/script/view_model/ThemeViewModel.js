@@ -17,6 +17,8 @@
  *
  */
 
+import {amplify} from 'amplify';
+
 import {PROPERTIES_TYPE} from '../properties/PropertiesType';
 import {WebAppEvents} from '../event/WebApp';
 
@@ -38,10 +40,10 @@ export class ThemeViewModel {
   }
 
   setTheme = newTheme => {
-    const classes = document.body.className
+    const classes = window.document.body.className
       .split(' ')
       .filter(elementClass => !elementClass.startsWith(THEMES_CLASS_PREFIX))
       .concat(`${THEMES_CLASS_PREFIX}${newTheme}`);
-    document.body.className = classes.join(' ');
+    window.document.body.className = classes.join(' ');
   };
 }

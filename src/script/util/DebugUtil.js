@@ -17,7 +17,7 @@
  *
  */
 
-import $ from 'jquery';
+import ko from 'knockout';
 import sodium from 'libsodium-wrappers-sumo';
 import Dexie from 'dexie';
 import {util as ProteusUtil} from '@wireapp/proteus';
@@ -373,7 +373,7 @@ export class DebugUtil {
       const context = new window.AudioContext();
       const osc = context.createOscillator(); // instantiate an oscillator
       osc.type = 'sine'; // this is the default - also square, sawtooth, triangle
-      osc.frequency.value = parseInt(hz, 10); // Hz
+      osc.frequency.value = window.parseInt(hz, 10); // Hz
       const dest = context.createMediaStreamDestination();
       osc.connect(dest); // connect it to the destination
       osc.start(0);
@@ -385,11 +385,11 @@ export class DebugUtil {
       const color = (constraints.deviceId || {}).exact || cameras[0].deviceId;
       const width = 300;
       const height = 240;
-      const canvas = document.createElement('canvas');
+      const canvas = window.document.createElement('canvas');
       canvas.height = height;
       canvas.width = width;
       const ctx = canvas.getContext('2d');
-      setInterval(() => {
+      window.setInterval(() => {
         ctx.fillStyle = `#${color}`;
         ctx.fillRect(0, 0, width, height);
         ctx.fillStyle = `#000`;
@@ -404,15 +404,15 @@ export class DebugUtil {
 
   toggleLiveCallingStats() {
     const containerId = 'live-calling-stats';
-    const containerElement = document.getElementById(containerId);
+    const containerElement = window.document.getElementById(containerId);
     if (containerElement) {
-      clearInterval(this.liveCallingStatsInterval);
-      document.body.removeChild(containerElement);
+      window.clearInterval(this.liveCallingStatsInterval);
+      window.document.body.removeChild(containerElement);
       return;
     }
-    const statsDomElement = document.createElement('div');
+    const statsDomElement = window.document.createElement('div');
     statsDomElement.id = containerId;
-    document.body.appendChild(statsDomElement);
+    window.document.body.appendChild(statsDomElement);
     const patch = snabbdomInit([style]);
     let vdom = createElement('div');
     patch(statsDomElement, vdom);
@@ -477,10 +477,10 @@ export class DebugUtil {
       const call = this.callingRepository.joinedCall();
       if (call) {
         renderFrame();
-        this.liveCallingStatsInterval = setInterval(renderFrame, 500);
+        this.liveCallingStatsInterval = window.setInterval(renderFrame, 500);
       } else {
         vdom = patch(vdom, createElement('div'));
-        clearInterval(this.liveCallingStatsInterval);
+        window.clearInterval(this.liveCallingStatsInterval);
       }
     });
   }

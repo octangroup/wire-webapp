@@ -18,7 +18,7 @@
  */
 
 import {Decoder} from 'bazinga64';
-import {ObservableArray} from 'knockout';
+import ko from 'knockout';
 import sodium from 'libsodium-wrappers-sumo';
 import {formatE164} from 'phoneformat.js';
 import UUID from 'uuidjs';
@@ -241,7 +241,7 @@ export const downloadBlob = (blob: Blob, filename: string, mimeType?: string): n
 };
 
 export const downloadFile = (url: string, fileName: string, mimeType?: string): number => {
-  const anchor = document.createElement('a');
+  const anchor = window.document.createElement('a');
   anchor.download = fileName;
   anchor.href = url;
   anchor.style.display = 'none';
@@ -251,13 +251,13 @@ export const downloadFile = (url: string, fileName: string, mimeType?: string): 
 
   // Firefox needs the element to be in the DOM for the download to start:
   // @see https://stackoverflow.com/a/32226068
-  document.body.appendChild(anchor);
+  window.document.body.appendChild(anchor);
   anchor.click();
 
   // Wait before removing resource and link. Needed in FF.
   return window.setTimeout(() => {
     const objectURL = anchor.href;
-    document.body.removeChild(anchor);
+    window.document.body.removeChild(anchor);
     window.URL.revokeObjectURL(objectURL);
   }, 100);
 };
@@ -273,7 +273,7 @@ export const alias = {
   animationend: 'transitionend animationend oAnimationEnd MSAnimationEnd mozAnimationEnd webkitAnimationEnd',
 };
 
-export const koPushDeferred = (target: ObservableArray, src: any[], number = 100, delay = 300) => {
+export const koPushDeferred = (target: ko.ObservableArray, src: any[], number = 100, delay = 300) => {
   // push array deferred to knockout observableArray
   let interval: number;
 

@@ -46,11 +46,11 @@ describe('AppLockViewModel', () => {
   const originalFeature = writeableConfig.FEATURE;
   beforeEach(() => {
     writeableConfig.FEATURE = {...writeableConfig.FEATURE};
-    document.body.innerHTML = '<div id="app"></div><div id="applock"></div>';
+    window.document.body.innerHTML = '<div id="app"></div><div id="applock"></div>';
   });
 
   afterEach(() => {
-    document.body.innerHTML = '';
+    window.document.body.innerHTML = '';
     writeableConfig.FEATURE = originalFeature;
   });
 
@@ -110,7 +110,7 @@ describe('AppLockViewModel', () => {
       jasmine.clock().tick(6000);
 
       expect(appLock.state()).toBe(APPLOCK_STATE.LOCKED);
-      document.body.innerHTML += `<form id="unlock"><input value="${passphrase}"/></form>`;
+      window.document.body.innerHTML += `<form id="unlock"><input value="${passphrase}"/></form>`;
       const unlockForm: HTMLFormElement = window.document.querySelector('#unlock');
       await appLock.onUnlock(unlockForm);
 

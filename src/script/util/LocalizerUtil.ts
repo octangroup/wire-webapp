@@ -20,8 +20,8 @@
 import {escape} from 'underscore';
 
 import {User} from '../entity/User';
-import {getSelfName} from './SanitizationUtil';
-import {sortUsersByPriority} from './StringUtil';
+import {getSelfName} from 'Util/SanitizationUtil';
+import {sortUsersByPriority} from 'Util/StringUtil';
 
 type Substitutes = Record<string, string> | string | number;
 
@@ -135,5 +135,4 @@ export function t(
 }
 
 export const joinNames = LocalizerUtil.joinNames;
-
-window.t = LocalizerUtil.translate;
+window.t = t;

@@ -41,7 +41,7 @@ const PLATFORM_NAME = {
 };
 
 const _getAppVersion = (): string => {
-  const versionElement = document.head.querySelector("[property='wire:version']");
+  const versionElement = window.document.head.querySelector("[property='wire:version']");
   const hasVersion = versionElement && versionElement.hasAttribute('version');
   return hasVersion ? versionElement.getAttribute('version').trim() : '';
 };
@@ -111,7 +111,7 @@ const _supportsNotifications = (): boolean => {
   }
 
   const requestPermissionNotSupported = window.Notification.requestPermission === undefined;
-  return requestPermissionNotSupported ? false : document.visibilityState !== undefined;
+  return requestPermissionNotSupported ? false : window.document.visibilityState !== undefined;
 };
 const _supportsScreenSharing = (): boolean => {
   const hasScreenCaptureAPI =

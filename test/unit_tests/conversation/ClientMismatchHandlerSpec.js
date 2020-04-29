@@ -25,6 +25,7 @@ import {createRandomUuid} from 'Util/util';
 import {Conversation} from 'src/script/entity/Conversation';
 import {EventInfoEntity} from 'src/script/conversation/EventInfoEntity';
 import {TestFactory} from '../../helper/TestFactory';
+import {entities} from '../../api/payloads';
 
 describe('ClientMismatchHandler', () => {
   const testFactory = new TestFactory();

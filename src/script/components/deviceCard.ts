@@ -17,7 +17,9 @@
  *
  */
 
+import ko from 'knockout';
 import {ClientClassification} from '@wireapp/api-client/dist/client';
+
 import {ClientEntity} from '../client/ClientEntity';
 
 interface DeviceCardParams {

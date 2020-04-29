@@ -25,7 +25,7 @@ import {AssetTransferState} from 'src/script/assets/AssetTransferState';
 import 'src/script/components/asset/controls/mediaButton';
 
 describe('media-button', () => {
-  const videoElement = document.createElement('video');
+  const videoElement = window.document.createElement('video');
   const defaultParams = {
     asset: {downloadProgress: () => 0},
     cancel: () => {},

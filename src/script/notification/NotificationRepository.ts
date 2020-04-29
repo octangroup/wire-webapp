@@ -794,7 +794,7 @@ export class NotificationRepository {
     const inMaximizedCall =
       this.callingRepository.joinedCall() && !this.contentViewModelState.multitasking.isMinimized();
 
-    const activeConversation = document.hasFocus() && inConversationView && inActiveConversation && !inMaximizedCall;
+    const activeConversation = window.document.hasFocus() && inConversationView && inActiveConversation && !inMaximizedCall;
     const messageFromSelf = messageEntity.user().isMe;
     const permissionDenied = this.permissionState() === PermissionStatusState.DENIED;
 

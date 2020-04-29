@@ -17,6 +17,8 @@
  *
  */
 
+import sinon from 'sinon';
+
 import {ConversationMapper} from 'src/script/conversation/ConversationMapper';
 import {StorageSchemata} from 'src/script/storage/StorageSchemata';
 import {TestFactory} from '../../helper/TestFactory';

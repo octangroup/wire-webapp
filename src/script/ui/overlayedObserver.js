@@ -48,7 +48,7 @@ const isOverlayed = domElement => {
   const box = domElement.getBoundingClientRect();
   const middlePointX = (box.right + box.left) / 2;
   const middlePointY = (box.bottom + box.top) / 2;
-  const elementAtPoint = document.elementFromPoint(middlePointX, middlePointY);
+  const elementAtPoint = window.document.elementFromPoint(middlePointX, middlePointY);
   return elementAtPoint && domElement !== elementAtPoint && !domElement.contains(elementAtPoint);
 };
 
@@ -57,7 +57,7 @@ const onElementVisible = (element, onVisible) => {
     return onVisible();
   }
   if (!overlayCheckerInterval) {
-    overlayCheckerInterval = setInterval(checkOverlayedElements, 300);
+    overlayCheckerInterval = window.setInterval(checkOverlayedElements, 300);
   }
   overlayedElements.set(element, {onVisible});
 };
@@ -65,7 +65,7 @@ const onElementVisible = (element, onVisible) => {
 const trackElement = (element, onChange) => {
   onChange(!isOverlayed(element));
   if (!overlayCheckerInterval) {
-    overlayCheckerInterval = setInterval(checkOverlayedElements, 300);
+    overlayCheckerInterval = window.setInterval(checkOverlayedElements, 300);
   }
   overlayedElements.set(element, {onChange});
 };
@@ -73,7 +73,7 @@ const trackElement = (element, onChange) => {
 const removeElement = element => {
   overlayedElements.delete(element);
   if (overlayedElements.size < 1 && overlayCheckerInterval) {
-    clearInterval(overlayCheckerInterval);
+    window.clearInterval(overlayCheckerInterval);
     overlayCheckerInterval = undefined;
   }
 };

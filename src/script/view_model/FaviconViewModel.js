@@ -17,6 +17,8 @@
  *
  */
 
+import ko from 'knockout';
+
 import {WebAppEvents} from '../event/WebApp';
 
 window.z = window.z || {};
@@ -46,11 +48,11 @@ z.viewModel.FaviconViewModel = class FaviconViewModel {
 
   _updateFavicon(unreadCount) {
     const iconBadge = unreadCount ? '-badge' : '';
-    const link = document.querySelector("link[rel*='shortcut icon']") || document.createElement('link');
+    const link = window.document.querySelector("link[rel*='shortcut icon']") || window.document.createElement('link');
     link.type = 'image/x-icon';
     link.rel = 'shortcut icon';
     link.href = `/image/favicon${iconBadge}.ico`;
-    document.getElementsByTagName('head')[0].appendChild(link);
+    window.document.getElementsByTagName('head')[0].appendChild(link);
   }
 
   dispose() {

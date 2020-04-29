@@ -25,7 +25,7 @@ export function copyText(text: string): Promise<void> {
   }
 
   try {
-    const fallbackSource = document.createElement('textarea');
+    const fallbackSource = window.document.createElement('textarea');
     fallbackSource.value = text;
 
     let selectedRange;
@@ -34,10 +34,10 @@ export function copyText(text: string): Promise<void> {
       selectedRange = window.getSelection().rangeCount ? window.getSelection().getRangeAt(0) : undefined;
     }
 
-    document.body.appendChild(fallbackSource);
+    window.document.body.appendChild(fallbackSource);
     fallbackSource.select();
-    document.execCommand('copy');
-    document.body.removeChild(fallbackSource);
+    window.document.execCommand('copy');
+    window.document.body.removeChild(fallbackSource);
 
     if (window.getSelection && selectedRange) {
       const currentSelection = window.getSelection();

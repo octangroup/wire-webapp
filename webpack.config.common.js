@@ -84,9 +84,7 @@ module.exports = {
   plugins: [
     new webpack.ProvidePlugin({
       $: 'jquery',
-      _: 'underscore',
       jQuery: 'jquery',
-      ko: 'knockout',
     }),
   ],
   resolve: {

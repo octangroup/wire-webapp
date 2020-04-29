@@ -34,7 +34,7 @@ describe('audio-seek-bar', () => {
   const defaultParams = {
     asset: audioAsset,
     disabled: ko.observable(false),
-    src: document.createElement('audio'),
+    src: window.document.createElement('audio'),
   };
 
   it('renders level indicators for the audio asset', async () => {
@@ -45,7 +45,7 @@ describe('audio-seek-bar', () => {
   });
 
   it('updates on audio events', async () => {
-    const audioElement = document.createElement('audio');
+    const audioElement = window.document.createElement('audio');
     Object.defineProperty(audioElement, 'duration', {get: () => 1000});
     audioElement.currentTime = 500;
     const params = {...defaultParams, src: audioElement};
@@ -65,7 +65,7 @@ describe('audio-seek-bar', () => {
   });
 
   it('updates the currentTime on click', async () => {
-    const audioElement = document.createElement('audio');
+    const audioElement = window.document.createElement('audio');
     Object.defineProperty(audioElement, 'duration', {get: () => 1000});
     audioElement.currentTime = 0;
     const params = {...defaultParams, src: audioElement};

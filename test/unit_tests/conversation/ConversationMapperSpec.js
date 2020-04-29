@@ -29,6 +29,8 @@ import {ConversationStatus} from 'src/script/conversation/ConversationStatus';
 import {BaseError} from 'src/script/error/BaseError';
 import {ConversationError} from 'src/script/error/ConversationError';
 
+import {entities, payload} from '../../api/payloads';
+
 describe('Conversation Mapper', () => {
   let conversation_mapper = null;
 

@@ -17,6 +17,9 @@
  *
  */
 
+import ko from 'knockout';
+import {amplify} from 'amplify';
+
 import {throttle} from 'underscore';
 import {isScrollable, isScrolledBottom, isScrolledTop} from 'Util/scroll-helpers';
 

@@ -18,7 +18,6 @@
  */
 
 import ko from 'knockout';
-import $ from 'jquery';
 
 import '../../../src/script/view_model/bindings/CommonBindings';
 
@@ -29,7 +28,7 @@ describe('ko.bindingHandlers', () => {
     let handler = null;
 
     beforeEach(() => {
-      element = document.createElement('div');
+      element = window.document.createElement('div');
 
       handler = {on_enter: () => 'yay'};
 

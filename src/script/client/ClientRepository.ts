@@ -17,6 +17,7 @@
  *
  */
 
+import ko from 'knockout';
 import {ClientClassification, NewClient, PublicClient, RegisteredClient} from '@wireapp/api-client/dist/client/';
 import {amplify} from 'amplify';
 import platform from 'platform';

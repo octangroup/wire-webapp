@@ -17,6 +17,9 @@
  *
  */
 
+import ko from 'knockout';
+import {amplify} from 'amplify';
+
 import {getLogger} from 'Util/Logger';
 import {afterRender} from 'Util/util';
 
@@ -95,7 +98,7 @@ export class MainViewModel {
 
     this.lightbox = new z.viewModel.ImageDetailViewViewModel(this, repositories);
     this.title = new WindowTitleViewModel(this, repositories);
-    this.favicon = new z.viewModel.FaviconViewModel(window.amplify);
+    this.favicon = new z.viewModel.FaviconViewModel(amplify);
     this.warnings = new WarningsViewModel();
 
     this.mainClasses = ko.pureComputed(() => {
@@ -107,7 +110,7 @@ export class MainViewModel {
 
     // Prevent Chrome (and Electron) from pushing the content out of the
     // viewport when using form elements (e.g. in the preferences)
-    document.addEventListener('scroll', () => window.scrollTo(0, 0));
+    window.document.addEventListener('scroll', () => window.scrollTo(0, 0));
   }
 
   openPanel() {
@@ -119,13 +122,13 @@ export class MainViewModel {
   }
 
   closePanelImmediately() {
-    document.querySelector('#app').classList.remove('app--panel-open');
+    window.document.querySelector('#app').classList.remove('app--panel-open');
     this.isPanelOpen(false);
   }
 
   togglePanel = forceState => {
-    const app = document.querySelector('#app');
-    const panel = document.querySelector('.right-column');
+    const app = window.document.querySelector('#app');
+    const panel = window.document.querySelector('.right-column');
 
     const isPanelOpen = app.classList.contains('app--panel-open');
     const isAlreadyClosed = forceState === MainViewModel.PANEL_STATE.CLOSED && !isPanelOpen;
@@ -136,8 +139,8 @@ export class MainViewModel {
       return Promise.resolve();
     }
 
-    const titleBar = document.querySelector('#conversation-title-bar');
-    const input = document.querySelector('#conversation-input-bar');
+    const titleBar = window.document.querySelector('#conversation-title-bar');
+    const input = window.document.querySelector('#conversation-input-bar');
 
     const isNarrowScreen = app.offsetWidth < MainViewModel.CONFIG.PANEL.BREAKPOINT;
 
@@ -152,7 +155,7 @@ export class MainViewModel {
           this._clearStyles(titleBar, ['width', 'transition']);
           this._clearStyles(input, ['width', 'transition']);
 
-          const overlay = document.querySelector('.center-column__overlay');
+          const overlay = window.document.querySelector('.center-column__overlay');
           if (isPanelOpen) {
             app.classList.remove('app--panel-open');
             this.isPanelOpen(false);

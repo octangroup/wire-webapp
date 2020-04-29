@@ -17,10 +17,7 @@
  *
  */
 
-import {amplify} from 'amplify';
 import jQuery from 'jquery';
-import Cookies from 'js-cookie';
-import ko from 'knockout';
 import {RaygunStatic} from 'raygun4js';
 import 'raygun4js/dist/raygun.vanilla';
 
@@ -59,7 +56,7 @@ import 'Components/serviceList';
 import 'Components/topPeople';
 import 'Components/userInput';
 
-import 'Util/LocalizerUtil';
+import {t} from 'Util/LocalizerUtil';
 
 import '../backup/Error';
 import '../conversation/EventBuilder';
@@ -92,14 +89,10 @@ import '../view_model/PanelViewModel';
 
 declare global {
   interface Window {
-    $: any;
-    amplify: amplify.Static;
-    bazinga64: any;
-    jQuery: any;
-    ko: typeof ko;
-    platform: any;
+    $: typeof jQuery;
+    jQuery: typeof jQuery;
     Raygun: RaygunStatic;
-    t: any;
+    t: typeof t;
     wire: {
       app: {
         service: {
@@ -163,8 +156,5 @@ declare global {
   }
 }
 
-window.amplify = amplify;
-window.Cookies = Cookies;
 // we need to publish jQuery on the window so that knockout can use it
 window.jQuery = jQuery;
-window.ko = ko;

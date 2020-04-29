@@ -17,6 +17,8 @@
  *
  */
 
+import {amplify} from 'amplify';
+
 import {WebAppEvents} from 'src/script/event/WebApp';
 
 describe('z.viewModel.FaviconViewModel', () => {
@@ -38,7 +40,7 @@ describe('z.viewModel.FaviconViewModel', () => {
     let dispatcher;
 
     beforeEach(() => {
-      dispatcher = {...window.amplify};
+      dispatcher = {...amplify};
       faviconViewModel = new z.viewModel.FaviconViewModel(dispatcher);
     });
 
@@ -65,7 +67,7 @@ describe('z.viewModel.FaviconViewModel', () => {
 
       tests.forEach(({faviconName, unreadCount}) => {
         faviconViewModel.unreadCount(unreadCount);
-        const faviconLink = document.querySelector('link[rel*=icon]');
+        const faviconLink = window.document.querySelector('link[rel*=icon]');
 
         expect(faviconLink.href).toContain(faviconName);
       });

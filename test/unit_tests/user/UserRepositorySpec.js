@@ -17,6 +17,8 @@
  *
  */
 
+import sinon from 'sinon';
+
 import {ConsentValue} from 'src/script/user/ConsentValue';
 import {PropertiesRepository} from 'src/script/properties/PropertiesRepository';
 import {ReceiptMode} from 'src/script/conversation/ReceiptMode';
@@ -24,6 +26,8 @@ import {User} from 'src/script/entity/User';
 import {EventRepository} from 'src/script/event/EventRepository';
 import {ClientMapper} from 'src/script/client/ClientMapper';
 import {Config} from 'src/script/Config';
+
+import {entities} from '../../api/payloads';
 import {TestFactory} from '../../helper/TestFactory';
 
 describe('UserRepository', () => {

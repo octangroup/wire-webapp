@@ -30,6 +30,6 @@ window.wire.env = {
 };
 
 // create initial div element with ID 'main' for react
-const main = document.createElement('div');
+const main = window.document.createElement('div');
 main.id = 'main';
-document.body.appendChild(main);
+window.document.body.appendChild(main);

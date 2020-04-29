@@ -17,6 +17,9 @@
  *
  */
 
+import ko from 'knockout';
+import {amplify} from 'amplify';
+
 import {getLogger} from 'Util/Logger';
 import {t} from 'Util/LocalizerUtil';
 import {alias} from 'Util/util';
@@ -153,7 +156,7 @@ export class ContentViewModel {
     if (repositories.team.supportsLegalHold()) {
       this.legalHoldModal.showRequestModal();
     }
-    ko.applyBindings(this, document.getElementById(this.elementId));
+    ko.applyBindings(this, window.document.getElementById(this.elementId));
   }
 
   _initSubscriptions() {

@@ -26,7 +26,7 @@ export function instantiateComponent(componentName, params = {}) {
 }
 
 export function bindHtml(htmlStr, context = {}) {
-  const destination = document.body;
+  const destination = window.document.body;
   ko.cleanNode(destination);
   destination.innerHTML = htmlStr; // eslint-disable-line no-unsanitized/property
   ko.applyBindings(context, destination);

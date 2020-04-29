@@ -17,6 +17,9 @@
  *
  */
 
+import {amplify} from 'amplify';
+import ko from 'knockout';
+
 import {AddParticipantsViewModel} from './panel/AddParticipantsViewModel';
 import {ConversationDetailsViewModel} from './panel/ConversationDetailsViewModel';
 import {ConversationParticipantsViewModel} from './panel/ConversationParticipantsViewModel';
@@ -101,7 +104,7 @@ export class PanelViewModel {
 
     amplify.subscribe(WebAppEvents.CONTENT.SWITCH, this._switchContent.bind(this));
     amplify.subscribe(OPEN_CONVERSATION_DETAILS, this._goToRoot.bind(this));
-    ko.applyBindings(this, document.getElementById(this.elementId));
+    ko.applyBindings(this, window.document.getElementById(this.elementId));
   }
 
   /**

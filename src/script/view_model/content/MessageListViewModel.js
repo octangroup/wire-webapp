@@ -17,7 +17,8 @@
  *
  */
 
-import $ from 'jquery';
+import ko from 'knockout';
+import {amplify} from 'amplify';
 import {groupBy} from 'underscore';
 
 import {getLogger} from 'Util/Logger';
@@ -574,7 +575,7 @@ export class MessageListViewModel {
 
     return () => {
       const trigger = () => callbacks.forEach(callback => callback());
-      return document.hasFocus() ? trigger() : $(window).one('focus', trigger);
+      return window.document.hasFocus() ? trigger() : $(window).one('focus', trigger);
     };
   }
 

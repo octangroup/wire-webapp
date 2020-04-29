@@ -17,6 +17,9 @@
  *
  */
 
+import ko from 'knockout';
+import {amplify} from 'amplify';
+
 import {getLogger} from 'Util/Logger';
 import {t} from 'Util/LocalizerUtil';
 
@@ -130,7 +133,7 @@ export class ConversationListViewModel {
     this.expandedFolders = ko.observableArray([]);
 
     this.showRecentConversations.subscribe(value => {
-      const conversationList = document.querySelector('.conversation-list');
+      const conversationList = window.document.querySelector('.conversation-list');
       if (conversationList) {
         conversationList.scrollTop = 0;
       }
@@ -178,7 +181,7 @@ export class ConversationListViewModel {
      *  lot of flickering every time the list updates.
      */
     this.getIsVisibleFunc = () => {
-      const conversationList = document.querySelector('.conversation-list');
+      const conversationList = window.document.querySelector('.conversation-list');
       if (!conversationList) {
         return () => false;
       }

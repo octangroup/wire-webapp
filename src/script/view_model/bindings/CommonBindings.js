@@ -18,7 +18,6 @@
  */
 
 import ko from 'knockout';
-import $ from 'jquery';
 import SimpleBar from 'simplebar';
 import {debounce, throttle} from 'underscore';
 import '@wireapp/antiscroll-2/dist/antiscroll-2';
@@ -191,7 +190,7 @@ ko.bindingHandlers.heightSync = {
     const params = ko.unwrap(valueAccessor()) || {};
 
     const resizeCallback = params.callback;
-    const targetElement = document.querySelector(params.target);
+    const targetElement = window.document.querySelector(params.target);
     const triggerValue = params.trigger;
 
     const resizeTarget = () => {
@@ -224,7 +223,7 @@ ko.bindingHandlers.heightSync = {
 ko.bindingHandlers.scrollSync = {
   init(element, valueAccessor) {
     const selector = valueAccessor();
-    const anchorElement = document.querySelector(selector);
+    const anchorElement = window.document.querySelector(selector);
     const syncScroll = () => (element.scrollTop = anchorElement.scrollTop);
     if (anchorElement) {
       anchorElement.addEventListener('scroll', syncScroll);
@@ -375,7 +374,7 @@ ko.bindingHandlers.fadingscrollbar = {
   init(element) {
     const animationSpeed = 12;
     function parseColor(color) {
-      const ctx = document.createElement('canvas').getContext('2d');
+      const ctx = window.document.createElement('canvas').getContext('2d');
       ctx.fillStyle = color;
       ctx.fillRect(0, 0, 1, 1);
       return ctx.getImageData(0, 0, 1, 1).data;

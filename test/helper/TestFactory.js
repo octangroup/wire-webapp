@@ -68,6 +68,8 @@ import {TeamService} from 'src/script/team/TeamService';
 import {SearchService} from 'src/script/search/SearchService';
 import {AssetUploader} from '../../src/script/assets/AssetUploader';
 
+import {entities} from '../api/payloads';
+
 export class TestFactory {
   /**
    * @returns {Promise<AuthRepository>} The authentication repository.

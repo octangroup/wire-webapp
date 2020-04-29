@@ -91,7 +91,7 @@ setStrings(strings);
   setLocale(locale);
   setDateLocale(locale);
 
-  document.getElementsByTagName('html')[0].setAttribute('lang', locale);
+  window.document.getElementsByTagName('html')[0].setAttribute('lang', locale);
 
   if (window.z.string[locale]) {
     window.z.string = {...window.z.string, ...window.z.string[DEFAULT_LOCALE], ...window.z.string[locale]};

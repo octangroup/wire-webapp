@@ -17,8 +17,8 @@
  *
  */
 
+import ko from 'knockout';
 import {amplify} from 'amplify';
-import {Observable, ObservableArray, PureComputed} from 'knockout';
 
 import {t} from 'Util/LocalizerUtil';
 import {Logger, getLogger} from 'Util/Logger';
@@ -43,8 +43,8 @@ export class IntegrationRepository {
   private readonly integrationService: IntegrationService;
   private readonly logger: Logger;
   private readonly teamRepository: TeamRepository;
-  public readonly isTeam: PureComputed<boolean>;
-  public readonly services: ObservableArray<ServiceEntity>;
+  public readonly isTeam: ko.PureComputed<boolean>;
+  public readonly services: ko.ObservableArray<ServiceEntity>;
 
   /**
    * Trim query string for search.
@@ -250,7 +250,7 @@ export class IntegrationRepository {
     });
   }
 
-  searchForServices(query: string, queryObservable: Observable<string>): Promise<void> {
+  searchForServices(query: string, queryObservable: ko.Observable<string>): Promise<void> {
     const normalizedQuery = IntegrationRepository.normalizeQuery(query);
 
     return this.teamRepository

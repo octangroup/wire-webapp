@@ -35,9 +35,9 @@ describe('overlayedObserver', () => {
       };
       spyOn(callbackSpy, 'onVisible');
 
-      const element = document.createElement('div');
+      const element = window.document.createElement('div');
       element.style.height = '10px';
-      document.body.appendChild(element);
+      window.document.body.appendChild(element);
 
       overlayedObserver.onElementVisible(element, callbackSpy.onVisible);
 
@@ -50,20 +50,20 @@ describe('overlayedObserver', () => {
       };
       spyOn(callbackSpy, 'onVisible');
 
-      const overlay = document.createElement('div');
+      const overlay = window.document.createElement('div');
       overlay.style.position = 'absolute';
       overlay.style.top = '0';
       overlay.style.left = '0';
       overlay.style.height = '100px';
       overlay.style.width = '100px';
-      const element = document.createElement('div');
+      const element = window.document.createElement('div');
       element.style.position = 'absolute';
       element.style.top = '10px';
       element.style.left = '10px';
       element.style.height = '10px';
       element.style.width = '10px';
-      document.body.appendChild(element);
-      document.body.appendChild(overlay);
+      window.document.body.appendChild(element);
+      window.document.body.appendChild(overlay);
 
       overlayedObserver.onElementVisible(element, callbackSpy.onVisible);
 
@@ -77,26 +77,26 @@ describe('overlayedObserver', () => {
       };
       spyOn(callbackSpy, 'onVisible');
 
-      const overlay = document.createElement('div');
+      const overlay = window.document.createElement('div');
       overlay.style.position = 'absolute';
       overlay.style.top = '0';
       overlay.style.left = '0';
       overlay.style.height = '100px';
       overlay.style.width = '100px';
-      const element = document.createElement('div');
+      const element = window.document.createElement('div');
       element.style.position = 'absolute';
       element.style.top = '10px';
       element.style.left = '10px';
       element.style.height = '10px';
       element.style.width = '10px';
-      document.body.appendChild(element);
-      document.body.appendChild(overlay);
+      window.document.body.appendChild(element);
+      window.document.body.appendChild(overlay);
 
       overlayedObserver.onElementVisible(element, callbackSpy.onVisible);
 
       expect(callbackSpy.onVisible).not.toHaveBeenCalled();
 
-      document.body.removeChild(overlay);
+      window.document.body.removeChild(overlay);
       jasmine.clock().tick(301);
 
       expect(callbackSpy.onVisible).toHaveBeenCalled();

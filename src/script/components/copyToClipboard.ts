@@ -17,6 +17,8 @@
  *
  */
 
+import ko from 'knockout';
+
 class CopyToClipboard {
   public readonly text: string;
 
@@ -26,7 +28,7 @@ class CopyToClipboard {
 
   onClick(viewModel: CopyToClipboard, event: JQuery.Event): void {
     if (window.getSelection) {
-      const selectionRange = document.createRange();
+      const selectionRange = window.document.createRange();
       selectionRange.selectNode(event.currentTarget as Node);
       window.getSelection().removeAllRanges();
       window.getSelection().addRange(selectionRange);

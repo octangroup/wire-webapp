@@ -84,7 +84,7 @@ const buildMetadataImage = (imageFile: File | Blob): Promise<Asset.ImageMetaData
 const buildMetadataVideo = (videoFile: File | Blob): Promise<Asset.VideoMetaData> => {
   return new Promise((resolve, reject) => {
     const url = window.URL.createObjectURL(videoFile);
-    const video = document.createElement('video');
+    const video = window.document.createElement('video');
     video.onloadedmetadata = () => {
       resolve(
         new Asset.VideoMetaData({

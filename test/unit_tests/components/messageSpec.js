@@ -81,7 +81,7 @@ describe('message', () => {
       expect(document.querySelector('.ctx-menu')).toBe(null);
       domContainer.querySelector('.context-menu').click();
 
-      const menu = document.querySelector('.ctx-menu');
+      const menu = window.document.querySelector('.ctx-menu');
 
       expect(menu).toBeDefined();
       menu.querySelector(`[title=${t('conversationContextMenuLike')}]`).click();
@@ -103,7 +103,7 @@ describe('message', () => {
     const params = {...defaultParams, isMarked: () => true};
     return instantiateComponent('message', params)
       .then(() => {
-        setTimeout(() => {
+        window.setTimeout(() => {
           expect(defaultParams.onMessageMarked).toHaveBeenCalled();
           done();
         }, 1);

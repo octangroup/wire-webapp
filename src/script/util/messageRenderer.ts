@@ -182,7 +182,7 @@ export const renderMessage = (message: string, selfId: string, mentionEntities: 
       link.attrPush(['data-uie-name', 'wire-deep-link']);
     }
     if (link.markup === 'linkify') {
-      nextToken.content = encodeURI(nextToken.content);
+      nextToken.content = window.encodeURI(nextToken.content);
     }
     return self.renderToken(tokens, idx, options);
   };

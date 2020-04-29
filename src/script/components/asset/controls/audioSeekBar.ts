@@ -77,7 +77,7 @@ class AudioSeekBarComponent {
     this.element.innerHTML = '';
 
     this.levels = scaledLoudness.map(loudness => {
-      const level = document.createElement('span');
+      const level = window.document.createElement('span');
       level.style.height = `${loudness}px`;
       this.element.appendChild(level);
       return level;

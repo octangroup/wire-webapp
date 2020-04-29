@@ -17,6 +17,9 @@
  *
  */
 
+import ko from 'knockout';
+import {amplify} from 'amplify';
+
 import {getLogger} from 'Util/Logger';
 import {t} from 'Util/LocalizerUtil';
 import {Environment} from 'Util/Environment';
@@ -84,7 +87,7 @@ export class WarningsViewModel {
       const hasOffset = warnings.length > 0 && !isConnectivityRecovery;
       const isMiniMode = WarningsViewModel.CONFIG.MINI_MODES.includes(visibleWarning);
 
-      const app = document.querySelector('#app');
+      const app = window.document.querySelector('#app');
       app.classList.toggle('app--small-offset', hasOffset && isMiniMode);
       app.classList.toggle('app--large-offset', hasOffset && !isMiniMode);
 
@@ -108,7 +111,7 @@ export class WarningsViewModel {
     amplify.subscribe(WebAppEvents.WARNING.SHOW, this.showWarning.bind(this));
     amplify.subscribe(WebAppEvents.WARNING.DISMISS, this.dismissWarning.bind(this));
 
-    ko.applyBindings(this, document.getElementById(this.elementId));
+    ko.applyBindings(this, window.document.getElementById(this.elementId));
 
     this.WebAppEvents = WebAppEvents;
     this.brandName = Config.getConfig().BRAND_NAME;

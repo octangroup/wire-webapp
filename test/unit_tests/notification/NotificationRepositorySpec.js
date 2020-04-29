@@ -17,6 +17,7 @@
  *
  */
 
+import ko from 'knockout';
 import {amplify} from 'amplify';
 import {Availability} from '@wireapp/protocol-messaging';
 
@@ -57,7 +58,9 @@ import {MentionEntity} from 'src/script/message/MentionEntity';
 
 import {ConnectionMapper} from 'src/script/connection/ConnectionMapper';
 import {ContentViewModel} from 'src/script/view_model/ContentViewModel';
+
 import {TestFactory} from '../../helper/TestFactory';
+import {entities, payload} from '../../api/payloads';
 
 window.wire = window.wire || {};
 window.wire.app = window.wire.app || {};
@@ -106,7 +109,7 @@ describe('NotificationRepository', () => {
       };
 
       // Mocks
-      document.hasFocus = () => false;
+      window.document.hasFocus = () => false;
       testFactory.notification_repository.permissionState(PermissionStatusState.GRANTED);
       Environment.browser.supports.notifications = true;
       testFactory.notification_repository.__test__assignEnvironment(Environment);
@@ -230,7 +233,7 @@ describe('NotificationRepository', () => {
 
     it('if the browser tab has focus and conversation is active', () => {
       testFactory.conversation_repository.active_conversation(conversation_et);
-      document.hasFocus = () => true;
+      window.document.hasFocus = () => true;
       testFactory.calling_repository.joinedCall = () => true;
 
       return testFactory.notification_repository

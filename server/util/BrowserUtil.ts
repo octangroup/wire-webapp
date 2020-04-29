@@ -155,7 +155,7 @@ function isSupportedBrowser(userAgent: string): boolean {
 
   try {
     const browserVersionString = (parsedUserAgent.browser.version.split('.') || [])[0];
-    const browserVersion = parseInt(browserVersionString, 10);
+    const browserVersion = window.parseInt(browserVersionString, 10);
     return supportedBrowserVersion ? browserVersion >= supportedBrowserVersion : false;
   } catch (err) {
     return false;

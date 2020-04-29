@@ -26,7 +26,7 @@ import {TestFactory} from '../../helper/TestFactory';
 import {ConversationError} from 'src/script/error/ConversationError';
 import {StorageError} from 'src/script/error/StorageError';
 
-const testEventServiceClass = (testedServiceName, className) => {
+export const testEventServiceClass = (testedServiceName, className) => {
   describe(className, () => {
     const conversationId = '35a9a89d-70dc-4d9e-88a2-4d8758458a6a';
     const senderId = '8b497692-7a38-4a5d-8287-e3d1006577d6';
@@ -626,5 +626,3 @@ const testEventServiceClass = (testedServiceName, className) => {
     });
   });
 };
-
-export {testEventServiceClass};

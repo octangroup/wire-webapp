@@ -100,12 +100,12 @@ export class RuntimeAction {
       }
 
       return new Promise((resolve, reject) => {
-        const connectionTimeout = setTimeout(
+        const connectionTimeout = window.setTimeout(
           () => reject(new Error('Error opening IndexedDB (response timeout)')),
           10000,
         );
         dbOpenRequest.onerror = event => {
-          clearTimeout(connectionTimeout);
+          window.clearTimeout(connectionTimeout);
           if (dbOpenRequest.error) {
             event.preventDefault();
             return reject(new Error('Error opening IndexedDB'));
@@ -113,7 +113,7 @@ export class RuntimeAction {
           return undefined;
         };
         dbOpenRequest.onsuccess = event => {
-          clearTimeout(connectionTimeout);
+          window.clearTimeout(connectionTimeout);
           resolve();
         };
       });

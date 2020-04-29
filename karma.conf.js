@@ -59,7 +59,7 @@ module.exports = function (config) {
     },
     customLaunchers: {
       ChromeNoSandbox: {
-        base: 'ChromeHeadless',
+        base: 'Chrome',
         flags: ['--no-sandbox', '--autoplay-policy=no-user-gesture-required'],
       },
     },
@@ -85,7 +85,7 @@ module.exports = function (config) {
       '/worker/': '/base/src/worker/',
     },
     reporters: ['progress', 'coverage-istanbul'],
-    singleRun: true,
+    singleRun: false,
   });
   if (process.env.TRAVIS) {
     config.set({

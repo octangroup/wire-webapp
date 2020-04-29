@@ -71,7 +71,7 @@ export const isRemovalAction = (keyboardEvent: KeyboardEvent): boolean =>
 
 export const insertAtCaret = (areaId: string, text: string) => {
   // http://stackoverflow.com/a/1064139
-  const textArea = document.getElementById(areaId) as HTMLTextAreaElement;
+  const textArea = window.document.getElementById(areaId) as HTMLTextAreaElement;
   if (!textArea) {
     return;
   }

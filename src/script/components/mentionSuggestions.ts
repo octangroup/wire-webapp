@@ -81,7 +81,7 @@ class MentionSuggestions {
   }
 
   setWrapperSize(size = '') {
-    const wrapper = document.querySelector<HTMLInputElement>('.conversation-input-bar-mention-suggestion');
+    const wrapper = window.document.querySelector<HTMLInputElement>('.conversation-input-bar-mention-suggestion');
     if (wrapper) {
       wrapper.style.width = size;
     }
@@ -180,7 +180,7 @@ class MentionSuggestions {
   }
 
   initTargetInput(): HTMLInputElement {
-    const input = this.targetInput || document.querySelector<HTMLInputElement>(this.targetInputSelector);
+    const input = this.targetInput || window.document.querySelector<HTMLInputElement>(this.targetInputSelector);
     input.addEventListener('keydown', this.onInput, true);
     this.targetInput = input;
     return input;

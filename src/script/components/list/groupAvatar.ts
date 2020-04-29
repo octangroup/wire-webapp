@@ -17,6 +17,8 @@
  *
  */
 
+import ko from 'knockout';
+
 import {User} from '../../entity/User';
 
 interface ComponentParams {
