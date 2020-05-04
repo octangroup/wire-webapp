@@ -21,7 +21,7 @@ import ko from 'knockout';
 
 import {clamp} from 'Util/NumberUtil';
 
-interface Params {
+interface SeekBarComponentParams {
   /** Media source */
   src: HTMLMediaElement;
   dark: boolean;
@@ -35,9 +35,9 @@ class SeekBarComponent {
   seekBar: HTMLInputElement;
   isSeekBarMouseOver: ko.Observable<boolean>;
   isSeekBarThumbDragged: ko.Observable<boolean>;
-  showSeekBarThumb: ko.PureComputed<any>;
+  showSeekBarThumb: ko.PureComputed<boolean>;
 
-  constructor(params: Params, element: HTMLElement) {
+  constructor(params: SeekBarComponentParams, componentInfo: ko.components.ComponentInfo) {
     this.mediaElement = params.src;
     this.darkMode = params.dark;
     this.disabled = ko.pureComputed(() => {
@@ -46,7 +46,7 @@ class SeekBarComponent {
       }
     });
 
-    this.seekBar = element.querySelector('input');
+    this.seekBar = (componentInfo.element as HTMLElement).querySelector('input');
     this.isSeekBarMouseOver = ko.observable(false);
     this.isSeekBarThumbDragged = ko.observable(false);
     this.showSeekBarThumb = ko.pureComputed(() => this.isSeekBarThumbDragged() || this.isSeekBarMouseOver());
@@ -122,8 +122,8 @@ ko.components.register('seek-bar', {
     <input type="range" value="0" max="100" data-bind="css: {'show-seek-bar-thumb': showSeekBarThumb, 'element-disabled': disabled, 'seek-bar--dark': darkMode}">
   `,
   viewModel: {
-    createViewModel(params: Params, {element}: ko.components.ComponentInfo): SeekBarComponent {
-      return new SeekBarComponent(params, element as HTMLElement);
+    createViewModel(params: SeekBarComponentParams, componentInfo: ko.components.ComponentInfo) {
+      return new SeekBarComponent(params, componentInfo);
     },
   },
 });

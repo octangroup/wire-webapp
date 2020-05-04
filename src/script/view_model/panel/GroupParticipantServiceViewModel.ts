@@ -21,7 +21,7 @@ import ko from 'knockout';
 
 import {getLogger, Logger} from 'Util/Logger';
 
-import {BasePanelViewModel, PanelViewModelProps} from './BasePanelViewModel';
+import {BasePanelViewModel, PanelViewModelParams} from './BasePanelViewModel';
 import {ServiceEntity} from '../../integration/ServiceEntity';
 import {ActionsViewModel} from '../ActionsViewModel';
 import {IntegrationRepository} from '../../integration/IntegrationRepository';
@@ -37,7 +37,7 @@ export class GroupParticipantServiceViewModel extends BasePanelViewModel {
   selectedInConversation: ko.PureComputed<boolean>;
   selfIsActiveParticipant: ko.PureComputed<boolean>;
   showActions: ko.PureComputed<boolean>;
-  constructor(params: PanelViewModelProps) {
+  constructor(params: PanelViewModelParams) {
     super(params);
 
     const {mainViewModel, repositories} = params;

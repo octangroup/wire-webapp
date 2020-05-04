@@ -72,43 +72,43 @@ interface MessageParams {
   onClickTimestamp: (messageId: string) => void;
   onContentUpdated: () => void;
   onLike: (message: ContentMessage, button?: boolean) => void;
-  onMessageMarked: (element: HTMLElement) => void;
+  onMessageMarked: (element: Node) => void;
   selfId: ko.Observable<string>;
   shouldShowAvatar: ko.Observable<boolean>;
   shouldShowInvitePeople: ko.Observable<boolean>;
 }
 
 class Message {
-  accentColor: ko.PureComputed<string>;
-  actionsViewModel: ActionsViewModel;
-  assetSubscription: ko.Subscription;
-  conversation: ko.Observable<Conversation>;
-  conversationRepository: ConversationRepository;
-  EphemeralStatusType: typeof EphemeralStatusType;
-  hasReadReceiptsTurnedOn: boolean;
-  includesOnlyEmojis: (text: string) => boolean;
-  isLastDeliveredMessage: ko.Observable<boolean>;
-  isSelfTemporaryGuest: ko.Observable<boolean>;
-  message: ContentMessage;
-  onClickAvatar: (user: User) => void;
-  onClickCancelRequest: (message: ContentMessage) => void;
-  onClickImage: (message: ContentMessage, event: UIEvent) => void;
-  onClickInvitePeople: () => void;
-  onClickLikes: (view: MessageListViewModel) => void;
-  onClickMessage: (message: ContentMessage, event: Event) => boolean;
-  onClickParticipants: (participants: User[]) => void;
-  onClickReceipts: (view: Message) => void;
-  onClickResetSession: (messageError: DecryptErrorMessage) => void;
-  onClickTimestamp: (messageId: string) => void;
-  onLike: (message: ContentMessage, button?: boolean) => void;
-  ParticipantAvatar: typeof ParticipantAvatar;
-  previewSubscription: ko.Subscription;
-  readReceiptText: ko.PureComputed<string>;
-  readReceiptTooltip: ko.PureComputed<string>;
-  selfId: ko.Observable<string>;
-  shouldShowAvatar: ko.Observable<boolean>;
-  shouldShowInvitePeople: ko.Observable<boolean>;
-  StatusType: typeof StatusType;
+  readonly accentColor: ko.PureComputed<string>;
+  readonly actionsViewModel: ActionsViewModel;
+  readonly assetSubscription: ko.Subscription;
+  readonly conversation: ko.Observable<Conversation>;
+  readonly conversationRepository: ConversationRepository;
+  readonly EphemeralStatusType: typeof EphemeralStatusType;
+  readonly hasReadReceiptsTurnedOn: boolean;
+  readonly includesOnlyEmojis: (text: string) => boolean;
+  readonly isLastDeliveredMessage: ko.Observable<boolean>;
+  readonly isSelfTemporaryGuest: ko.Observable<boolean>;
+  readonly message: ContentMessage;
+  readonly onClickAvatar: (user: User) => void;
+  readonly onClickCancelRequest: (message: ContentMessage) => void;
+  readonly onClickImage: (message: ContentMessage, event: UIEvent) => void;
+  readonly onClickInvitePeople: () => void;
+  readonly onClickLikes: (view: MessageListViewModel) => void;
+  readonly onClickMessage: (message: ContentMessage, event: Event) => boolean;
+  readonly onClickParticipants: (participants: User[]) => void;
+  readonly onClickReceipts: (view: Message) => void;
+  readonly onClickResetSession: (messageError: DecryptErrorMessage) => void;
+  readonly onClickTimestamp: (messageId: string) => void;
+  readonly onLike: (message: ContentMessage, button?: boolean) => void;
+  readonly ParticipantAvatar: typeof ParticipantAvatar;
+  readonly previewSubscription: ko.Subscription;
+  readonly readReceiptText: ko.PureComputed<string>;
+  readonly readReceiptTooltip: ko.PureComputed<string>;
+  readonly selfId: ko.Observable<string>;
+  readonly shouldShowAvatar: ko.Observable<boolean>;
+  readonly shouldShowInvitePeople: ko.Observable<boolean>;
+  readonly StatusType: typeof StatusType;
 
   constructor(
     {
@@ -136,7 +136,7 @@ class Message {
       conversationRepository,
       actionsViewModel,
     }: MessageParams,
-    componentInfo: {element: HTMLElement},
+    componentInfo: ko.components.ComponentInfo,
   ) {
     this.message = message;
     this.conversation = conversation;
@@ -724,7 +724,7 @@ ko.components.register('message', {
     <!-- /ko -->
     `,
   viewModel: {
-    createViewModel: (params: MessageParams, componentInfo: {element: HTMLElement}) => {
+    createViewModel(params: MessageParams, componentInfo: ko.components.ComponentInfo) {
       return new Message(params, componentInfo);
     },
   },

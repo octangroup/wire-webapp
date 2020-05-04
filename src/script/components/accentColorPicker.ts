@@ -26,14 +26,13 @@ interface AccentColorPickerParams {
 }
 
 class AccentColorPicker {
-  accentColorIds: number[];
-  selected: (id: string) => void;
-  user: User;
+  readonly accentColorIds: number[];
+  readonly selected: (id: string) => void;
+  readonly user: User;
 
   constructor({user, selected}: AccentColorPickerParams) {
     this.selected = selected;
     this.user = ko.unwrap(user);
-
     this.accentColorIds = [1, 2, 4, 5, 6, 7];
   }
 
@@ -55,5 +54,9 @@ ko.components.register('accent-color-picker', {
       <label data-bind="attr: {for: $parent.getId(id)}, css: $parent.getClass(id)"></label>
     <!-- /ko -->
   `,
-  viewModel: AccentColorPicker,
+  viewModel: {
+    createViewModel(params: AccentColorPickerParams) {
+      return new AccentColorPicker(params);
+    },
+  },
 });

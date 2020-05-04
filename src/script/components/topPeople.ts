@@ -61,5 +61,9 @@ ko.components.register('top-people', {
       </div>
     </div>
   `,
-  viewModel: TopPeople,
+  viewModel: {
+    createViewModel(params: TopPeopleParams) {
+      return new TopPeople(params);
+    },
+  },
 });

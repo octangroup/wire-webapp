@@ -19,8 +19,16 @@
 
 import {User} from '../../entity/User';
 
-interface ComponentParams {
+interface GroupAvatarParams {
   users: ko.PureComputed<User[]>;
+}
+
+class GroupAvatar {
+  readonly users: ko.PureComputed<User[]>;
+
+  constructor(params: GroupAvatarParams) {
+    this.users = ko.pureComputed(() => params.users().slice(0, 4));
+  }
 }
 
 ko.components.register('group-avatar', {
@@ -29,11 +37,9 @@ ko.components.register('group-avatar', {
       <div class="group-avatar-box" data-bind="text: Array.from($data.initials())[0], style: {color: $data.accent_color()}"></div>
     </div>
   `,
-  viewModel: class {
-    readonly users: ko.PureComputed<User[]>;
-
-    constructor(params: ComponentParams) {
-      this.users = ko.pureComputed(() => params.users().slice(0, 4));
-    }
+  viewModel: {
+    createViewModel(params: GroupAvatarParams) {
+      return new GroupAvatar(params);
+    },
   },
 });

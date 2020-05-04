@@ -31,10 +31,10 @@ interface MessageTimerButtonParams {
 }
 
 class MessageTimerButton {
-  conversationEntity: ko.Observable<Conversation>;
-  hasMessageTimer: ko.PureComputed<any>;
-  isTimerDisabled: ko.PureComputed<any>;
-  duration: ko.PureComputed<DurationUnit | {}>;
+  readonly conversationEntity: ko.Observable<Conversation>;
+  readonly duration: ko.PureComputed<DurationUnit | {}>;
+  readonly hasMessageTimer: ko.PureComputed<any>;
+  readonly isTimerDisabled: ko.PureComputed<any>;
 
   constructor(params: MessageTimerButtonParams) {
     this.conversationEntity = params.conversation;

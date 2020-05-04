@@ -29,33 +29,36 @@ import {MediaType} from '../../media/MediaType';
 import {viewportObserver} from '../../ui/viewportObserver';
 
 import 'Components/availabilityState';
+import {User} from '../../entity/User';
 
-interface ConversationListCellProps {
-  showJoinButton: boolean;
-  conversation: Conversation;
-  onJoinCall: (conversation: Conversation, mediaType: MediaType) => void;
-  is_selected: (conversation: Conversation) => boolean;
+interface ConversationListCellParams {
   click: () => void;
+  conversation: Conversation;
   index: ko.Observable<number>;
+  is_selected: (conversation: Conversation) => boolean;
   isVisibleFunc: (top: number, bottom: number) => boolean;
   offsetTop: ko.Observable<number>;
+  onJoinCall: (conversation: Conversation, mediaType: MediaType) => void;
+  showJoinButton: boolean;
 }
 
 class ConversationListCell {
-  conversation: Conversation;
-  isSelected: ko.Computed<boolean>;
-  on_click: () => void;
-  ParticipantAvatar: typeof ParticipantAvatar;
-  showJoinButton: boolean;
-  isGroup: boolean;
-  is1To1: boolean;
-  isInTeam: boolean;
-  isInViewport: ko.Observable<boolean>;
-  users: any;
-  cell_state: ko.Observable<ReturnType<typeof generateCellState>>;
-  ConversationStatusIcon: typeof ConversationStatusIcon;
-  onClickJoinCall: (viewModel: ConversationListCell, event: MouseEvent) => void;
-  dispose: () => void;
+  readonly cell_state: ko.Observable<ReturnType<typeof generateCellState>>;
+  readonly conversation: Conversation;
+  readonly ConversationStatusIcon: typeof ConversationStatusIcon;
+  readonly is1To1: boolean;
+  readonly isGroup: boolean;
+  readonly isInTeam: boolean;
+  readonly isInViewport: ko.Observable<boolean>;
+  readonly isSelected: ko.Computed<boolean>;
+  readonly on_click: () => void;
+  readonly onClickJoinCall: (viewModel: ConversationListCell, event: MouseEvent) => void;
+  readonly ParticipantAvatar: typeof ParticipantAvatar;
+  readonly showJoinButton: boolean;
+  readonly users: ko.ObservableArray<User>;
+  cellStateObservable: ko.Computed<any>;
+  componentInfo: ko.components.ComponentInfo;
+
   constructor(
     {
       showJoinButton,
@@ -66,8 +69,8 @@ class ConversationListCell {
       index = ko.observable(0),
       isVisibleFunc = () => false,
       offsetTop = ko.observable(0),
-    }: ConversationListCellProps,
-    element: HTMLElement,
+    }: ConversationListCellParams,
+    componentInfo: ko.components.ComponentInfo,
   ) {
     this.conversation = conversation;
     this.isSelected = ko.computed(() => is_selected(conversation));
@@ -78,6 +81,7 @@ class ConversationListCell {
     this.isGroup = conversation.isGroup();
     this.is1To1 = conversation.is1to1();
     this.isInTeam = conversation.selfUser().inTeam();
+    this.componentInfo = componentInfo;
 
     const cellHeight = 56;
     const cellTop = index() * cellHeight + offsetTop();
@@ -94,11 +98,11 @@ class ConversationListCell {
 
     if (!isInitiallyVisible) {
       viewportObserver.trackElement(
-        element,
+        this.componentInfo.element as HTMLElement,
         (isInViewport: boolean) => {
           if (isInViewport) {
             this.isInViewport(true);
-            viewportObserver.removeElement(element);
+            viewportObserver.removeElement(this.componentInfo.element);
           }
         },
         false,
@@ -117,16 +121,16 @@ class ConversationListCell {
       onJoinCall(conversation, MediaType.AUDIO);
     };
 
-    const cellStateObservable = ko
+    this.cellStateObservable = ko
       .computed(() => this.cell_state(generateCellState(this.conversation)))
       .extend({rateLimit: 500});
-
-    this.dispose = () => {
-      viewportObserver.removeElement(element);
-      cellStateObservable.dispose();
-      this.isSelected.dispose();
-    };
   }
+
+  dispose = () => {
+    viewportObserver.removeElement(this.componentInfo.element as HTMLElement);
+    this.cellStateObservable.dispose();
+    this.isSelected.dispose();
+  };
 }
 
 ko.components.register('conversation-list-cell', {
@@ -188,7 +192,8 @@ ko.components.register('conversation-list-cell', {
     </div>
   `,
   viewModel: {
-    createViewModel: (props: ConversationListCellProps, componentInfo: any) =>
-      new ConversationListCell(props, componentInfo.element),
+    createViewModel(params: ConversationListCellParams, componentInfo: ko.components.ComponentInfo) {
+      return new ConversationListCell(params, componentInfo);
+    },
   },
 });

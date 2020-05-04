@@ -20,9 +20,19 @@
 import {ParticipantAvatar} from 'Components/participantAvatar';
 import {ServiceEntity} from '../../integration/ServiceEntity';
 
-interface ComponentParams {
+interface ServiceDetailsParams {
   service: ServiceEntity;
   participantAvatar: ParticipantAvatar;
+}
+
+class ServiceDetails {
+  readonly service: ServiceEntity;
+  readonly ParticipantAvatar: typeof ParticipantAvatar;
+
+  constructor(params: ServiceDetailsParams) {
+    this.service = params.service;
+    this.ParticipantAvatar = ParticipantAvatar;
+  }
 }
 
 ko.components.register('panel-service-details', {
@@ -34,13 +44,9 @@ ko.components.register('panel-service-details', {
       <div class="panel-participant__service-description" data-bind="text: service().description" data-uie-name="status-service-description"></div>
     </div>
   `,
-  viewModel: class {
-    readonly service: ServiceEntity;
-    readonly ParticipantAvatar: typeof ParticipantAvatar;
-
-    constructor(params: ComponentParams) {
-      this.service = params.service;
-      this.ParticipantAvatar = ParticipantAvatar;
-    }
+  viewModel: {
+    createViewModel(params: ServiceDetailsParams) {
+      return new ServiceDetails(params);
+    },
   },
 });

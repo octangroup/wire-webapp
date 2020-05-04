@@ -28,13 +28,13 @@ interface ImageParams {
 }
 
 class Image {
-  asset: AssetRemoteData;
-  assetSrc: ko.Observable<any>;
-  assetIsLoading: ko.Observable<boolean>;
-  element: HTMLElement;
-  params: ImageParams;
+  readonly asset: AssetRemoteData;
+  readonly assetSrc: ko.Observable<string>;
+  readonly assetIsLoading: ko.Observable<boolean>;
+  readonly element: Node;
+  readonly params: ImageParams;
 
-  constructor(params: ImageParams, componentInfo: {element: HTMLElement}) {
+  constructor(params: ImageParams, componentInfo: ko.components.ComponentInfo) {
     this.asset = ko.unwrap(params.asset);
     this.assetSrc = ko.observable();
     this.assetIsLoading = ko.observable(false);
@@ -51,7 +51,7 @@ class Image {
       });
     };
 
-    viewportObserver.onElementInViewport(this.element, _onInViewport);
+    viewportObserver.onElementInViewport(this.element as HTMLElement, _onInViewport);
   }
 
   onClick = () => {
@@ -79,7 +79,7 @@ ko.components.register('image-component', {
     <!-- /ko -->
   `,
   viewModel: {
-    createViewModel(params: ImageParams, componentInfo: {element: HTMLElement}) {
+    createViewModel(params: ImageParams, componentInfo: ko.components.ComponentInfo) {
       return new Image(params, componentInfo);
     },
   },

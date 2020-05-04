@@ -36,14 +36,14 @@ interface FullSearchParams {
 }
 
 class FullSearch {
-  input: ko.Observable<string>;
-  inputSubscription: ko.Subscription;
+  readonly input: ko.Observable<string>;
+  readonly inputSubscription: ko.Subscription;
+  readonly params: FullSearchParams;
+  readonly ParticipantAvatar: typeof ParticipantAvatar;
+  readonly searchProvider: (query: string) => Promise<{query: string; messageEntities: Message[]}>;
+  readonly showNoResultsText: ko.Observable<boolean>;
+  readonly visibleMessageEntities: ko.ObservableArray<Message>;
   messageEntities: Message[];
-  params: FullSearchParams;
-  ParticipantAvatar: typeof ParticipantAvatar;
-  searchProvider: (query: string) => Promise<{query: string; messageEntities: Message[]}>;
-  showNoResultsText: ko.Observable<boolean>;
-  visibleMessageEntities: ko.ObservableArray<Message>;
 
   static get CONFIG() {
     return {
@@ -191,5 +191,9 @@ ko.components.register('full-search', {
       </div>
     </div>
   `,
-  viewModel: FullSearch,
+  viewModel: {
+    createViewModel(params: FullSearchParams) {
+      return new FullSearch(params);
+    },
+  },
 });

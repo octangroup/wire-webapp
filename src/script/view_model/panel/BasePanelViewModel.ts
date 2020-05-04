@@ -31,7 +31,7 @@ import {UserRepository} from '../../user/UserRepository';
 import {MainViewModel} from '../MainViewModel';
 import {IntegrationRepository} from '../../integration/IntegrationRepository';
 
-export interface PanelViewModelProps {
+export interface PanelViewModelParams {
   isVisible: ko.Observable<boolean>;
   navigateTo: (target: string, params?: {entity?: User | ServiceEntity; addMode?: boolean}) => void;
   onClose: () => void;
@@ -50,13 +50,14 @@ export interface PanelViewModelProps {
 }
 
 export class BasePanelViewModel {
-  onClose: () => void;
-  onGoBack: () => void;
-  onGoToRoot: () => void;
-  navigateTo: PanelViewModelProps['navigateTo'];
-  isVisible: ko.Observable<boolean>;
-  activeConversation: ko.Observable<Conversation>;
-  constructor({isVisible, navigateTo, onClose, onGoBack, onGoToRoot, repositories}: PanelViewModelProps) {
+  readonly activeConversation: ko.Observable<Conversation>;
+  readonly isVisible: ko.Observable<boolean>;
+  readonly navigateTo: PanelViewModelParams['navigateTo'];
+  readonly onClose: () => void;
+  readonly onGoBack: () => void;
+  readonly onGoToRoot: () => void;
+
+  constructor({isVisible, navigateTo, onClose, onGoBack, onGoToRoot, repositories}: PanelViewModelParams) {
     this.onClose = onClose;
     this.onGoBack = onGoBack;
     this.onGoToRoot = onGoToRoot;

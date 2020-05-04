@@ -19,29 +19,31 @@
 
 import ko from 'knockout';
 
-interface Params {
+interface DeviceToggleButtonParams {
   currentDevice: ko.Observable<string>;
   devices: ko.Observable<string[]>;
   onChooseDevice: (deviceId: string) => void;
 }
 
 class DeviceToggleButton {
-  private readonly availableDevices: ko.Observable<string[]>;
-  private readonly currentDevice: ko.Observable<string>;
-  public selectNextDevice: (data: any, event: any) => void;
+  readonly availableDevices: ko.Observable<string[]>;
+  readonly currentDevice: ko.Observable<string>;
+  onChooseDevice: (deviceId: string) => void;
 
-  constructor({currentDevice, devices, onChooseDevice}: Params) {
+  constructor({currentDevice, devices, onChooseDevice}: DeviceToggleButtonParams) {
     this.availableDevices = devices;
     this.currentDevice = currentDevice;
-    this.selectNextDevice = (data: any, event: any) => {
-      event.preventDefault();
-      event.stopPropagation();
-      const currentDeviceIndex = this.availableDevices().indexOf(this.currentDevice());
-      const newDeviceIndex = (currentDeviceIndex + 1) % this.availableDevices().length;
-      const newDeviceId = this.availableDevices()[newDeviceIndex];
-      onChooseDevice(newDeviceId);
-    };
+    this.onChooseDevice = onChooseDevice;
   }
+
+  selectNextDevice = (_: unknown, event: MouseEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+    const currentDeviceIndex = this.availableDevices().indexOf(this.currentDevice());
+    const newDeviceIndex = (currentDeviceIndex + 1) % this.availableDevices().length;
+    const newDeviceId = this.availableDevices()[newDeviceIndex];
+    this.onChooseDevice(newDeviceId);
+  };
 }
 
 ko.components.register('device-toggle-button', {
@@ -50,5 +52,9 @@ ko.components.register('device-toggle-button', {
       <span class="device-toggle-button-indicator-dot" data-bind="css: {'device-toggle-button-indicator-dot-active': device === currentDevice()}"></span>
     </div>
   `,
-  viewModel: DeviceToggleButton,
+  viewModel: {
+    createViewModel(params: DeviceToggleButtonParams) {
+      return new DeviceToggleButton(params);
+    },
+  },
 });

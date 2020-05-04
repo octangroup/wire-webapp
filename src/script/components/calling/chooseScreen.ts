@@ -21,13 +21,25 @@ import ko from 'knockout';
 
 interface Screen {
   id: string;
-  thumbnail: any;
+  thumbnail: HTMLCanvasElement;
 }
 
-interface Params {
+interface ChooseScreenParams {
   cancel: () => void;
   choose: (screenId: string) => void;
   screens: ko.Observable<Screen[]>;
+}
+
+class ChooseScreen {
+  onCancel: () => void;
+  onChoose: (screenId: string) => void;
+  screens: ko.Observable<Screen[]>;
+
+  constructor({cancel, choose, screens = ko.observable([])}: ChooseScreenParams) {
+    this.onCancel = cancel;
+    this.onChoose = choose;
+    this.screens = screens;
+  }
 }
 
 ko.components.register('choose-screen', {
@@ -44,9 +56,9 @@ ko.components.register('choose-screen', {
            data-bind="click: onCancel"></div>
     </div>
   `,
-  viewModel: function ({cancel, choose, screens}: Params): void {
-    this.onCancel = cancel;
-    this.onChoose = choose;
-    this.screens = screens || [];
+  viewModel: {
+    createViewModel(params: ChooseScreenParams) {
+      return new ChooseScreen(params);
+    },
   },
 });

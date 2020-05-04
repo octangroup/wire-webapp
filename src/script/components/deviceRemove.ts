@@ -27,13 +27,13 @@ interface DeviceRemoveParams {
 }
 
 class DeviceRemove {
-  device_remove_error: ko.Observable<Error | false>;
-  device: ClientEntity;
-  model?: string;
-  params: DeviceRemoveParams;
-  password: ko.Observable<string>;
-  passwordSubscription: any;
-  remove_form_visible: any;
+  readonly device_remove_error: ko.Observable<Error | false>;
+  readonly device: ClientEntity;
+  readonly model?: string;
+  readonly params: DeviceRemoveParams;
+  readonly password: ko.Observable<string>;
+  readonly passwordSubscription: ko.Subscription;
+  readonly remove_form_visible: ko.Observable<boolean>;
 
   constructor(params: DeviceRemoveParams) {
     this.params = params;

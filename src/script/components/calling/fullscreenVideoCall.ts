@@ -20,56 +20,61 @@
 import {CALL_TYPE} from '@wireapp/avs';
 import {amplify} from 'amplify';
 import ko from 'knockout';
+
 import {TIME_IN_MILLIS, formatSeconds} from 'Util/TimeUtil';
+
 import {Call} from '../../calling/Call';
 import {Grid} from '../../calling/videoGridHandler';
 import {Conversation} from '../../entity/Conversation';
 import {ElectronDesktopCapturerSource, MediaDevicesHandler} from '../../media/MediaDevicesHandler';
-
 import {WebAppEvents} from '../../event/WebApp';
+import {CallActions} from '../../view_model/CallingViewModel';
 
 import 'Components/calling/deviceToggleButton';
 
-interface Params {
-  videoGrid: ko.Observable<Grid>;
+interface FullscreenVideoCallingParams {
   call: Call;
+  callActions: CallActions;
+  canShareScreen: boolean;
   conversation: ko.Observable<Conversation>;
+  isChoosingScreen: ko.Observable<boolean>;
+  isMuted: ko.Observable<boolean>;
   mediaDevicesHandler: MediaDevicesHandler;
   multitasking: any;
-  canShareScreen: boolean;
-  callActions: any;
-  isMuted: ko.Observable<boolean>;
-  isChoosingScreen: ko.Observable<boolean>;
+  videoGrid: ko.Observable<Grid>;
 }
 
 export class FullscreenVideoCalling {
-  public videoGrid: ko.Observable<Grid>;
-  public call: Call;
-  public conversation: ko.Observable<Conversation>;
-  public mediaDevicesHandler: MediaDevicesHandler;
-  public multitasking: any;
-  public canShareScreen: boolean;
-  public callActions: any;
-  public isMuted: ko.Observable<boolean>;
-  public isChoosingScreen: ko.Observable<boolean>;
+  readonly videoGrid: ko.Observable<Grid>;
+  readonly call: Call;
+  readonly conversation: ko.Observable<Conversation>;
+  readonly mediaDevicesHandler: MediaDevicesHandler;
+  readonly multitasking: any;
+  readonly canShareScreen: boolean;
+  readonly callActions: any;
+  readonly isMuted: ko.Observable<boolean>;
+  readonly isChoosingScreen: ko.Observable<boolean>;
 
-  public selfSharesScreen: () => boolean;
-  public selfSharesCamera: () => boolean;
-  public currentCameraDevice: ko.Observable<string>;
-  public currentScreenDevice: ko.Observable<string>;
+  readonly selfSharesScreen: () => boolean;
+  readonly selfSharesCamera: () => boolean;
+  readonly currentCameraDevice: ko.Observable<string>;
+  readonly currentScreenDevice: ko.Observable<string>;
 
-  public availableCameras: ko.PureComputed<string[]>;
-  public availableScreens: ko.PureComputed<string[]>;
-  public showSwitchCamera: ko.PureComputed<boolean>;
-  public showSwitchScreen: ko.PureComputed<boolean>;
+  readonly availableCameras: ko.PureComputed<string[]>;
+  readonly availableScreens: ko.PureComputed<string[]>;
+  readonly showSwitchCamera: ko.PureComputed<boolean>;
+  readonly showSwitchScreen: ko.PureComputed<boolean>;
 
-  public hasUnreadMessages: ko.Observable<boolean>;
+  readonly hasUnreadMessages: ko.Observable<boolean>;
 
-  public showToggleVideo: ko.PureComputed<boolean>;
-  public callDuration: ko.Observable<string>;
+  readonly showToggleVideo: ko.PureComputed<boolean>;
+  readonly callDuration: ko.Observable<string>;
 
-  public HIDE_CONTROLS_TIMEOUT: number;
-  public dispose: () => void;
+  readonly HIDE_CONTROLS_TIMEOUT: number;
+  readonly updateUnreadCount: (unreadCount: number) => any;
+  readonly gridSubscription: ko.Computed<void>;
+  readonly startedAtSubscription: ko.Computed<void>;
+  callDurationUpdateInterval: number;
 
   // tslint:disable-next-line:typedef
   static get CONFIG() {
@@ -89,7 +94,7 @@ export class FullscreenVideoCalling {
     callActions,
     isMuted,
     isChoosingScreen,
-  }: Params) {
+  }: FullscreenVideoCallingParams) {
     this.call = call;
     this.conversation = conversation;
     this.videoGrid = videoGrid;
@@ -129,8 +134,8 @@ export class FullscreenVideoCalling {
     });
 
     this.callDuration = ko.observable();
-    let callDurationUpdateInterval: number;
-    const startedAtSubscription = ko.computed(() => {
+
+    this.startedAtSubscription = ko.computed(() => {
       const startedAt = call.startedAt();
       if (startedAt) {
         const updateTimer = () => {
@@ -138,12 +143,12 @@ export class FullscreenVideoCalling {
           this.callDuration(formatSeconds(time));
         };
         updateTimer();
-        callDurationUpdateInterval = window.setInterval(updateTimer, 1000);
+        this.callDurationUpdateInterval = window.setInterval(updateTimer, 1000);
       }
     });
 
     let minimizeTimeout: number;
-    const gridSubscription = ko.computed(() => {
+    this.gridSubscription = ko.computed(() => {
       const grid = this.videoGrid();
       window.clearTimeout(minimizeTimeout);
       minimizeTimeout = undefined;
@@ -158,18 +163,18 @@ export class FullscreenVideoCalling {
       }
     });
 
-    const updateUnreadCount = (unreadCount: number) => this.hasUnreadMessages(unreadCount > 0);
+    this.updateUnreadCount = (unreadCount: number) => this.hasUnreadMessages(unreadCount > 0);
 
     this.hasUnreadMessages = ko.observable(false);
-    amplify.subscribe(WebAppEvents.LIFECYCLE.UNREAD_COUNT, updateUnreadCount);
-
-    this.dispose = () => {
-      amplify.unsubscribe(WebAppEvents.LIFECYCLE.UNREAD_COUNT, updateUnreadCount);
-      window.clearInterval(callDurationUpdateInterval);
-      startedAtSubscription.dispose();
-      gridSubscription.dispose();
-    };
+    amplify.subscribe(WebAppEvents.LIFECYCLE.UNREAD_COUNT, this.updateUnreadCount);
   }
+
+  dispose = () => {
+    amplify.unsubscribe(WebAppEvents.LIFECYCLE.UNREAD_COUNT, this.updateUnreadCount);
+    window.clearInterval(this.callDurationUpdateInterval);
+    this.startedAtSubscription.dispose();
+    this.gridSubscription.dispose();
+  };
 
   switchCameraSource = (call: Call, deviceId: string) => {
     this.callActions.switchCameraInput(call, deviceId);
@@ -264,6 +269,10 @@ ko.components.register('fullscreen-video-call', {
  <!-- /ko -->
 
 </div>
-  `,
-  viewModel: FullscreenVideoCalling,
+`,
+  viewModel: {
+    createViewModel(params: FullscreenVideoCallingParams) {
+      return new FullscreenVideoCalling(params);
+    },
+  },
 });

@@ -25,6 +25,20 @@ interface GroupedConversationHeaderParams {
   isOpen: boolean;
 }
 
+class GroupedConversationHeader {
+  badge: ko.PureComputed<number>;
+  isOpen: boolean;
+  label: ConversationLabel;
+
+  constructor({conversationLabel, isOpen}: GroupedConversationHeaderParams) {
+    this.label = conversationLabel;
+    this.isOpen = isOpen;
+    this.badge = ko.pureComputed(
+      () => conversationLabel.conversations().filter(conversation => conversation.hasUnread()).length,
+    );
+  }
+}
+
 ko.components.register('grouped-conversation-header', {
   template: `
     <div class="conversation-folder__head" data-uie-name="conversation-folder-head" data-bind="css: {'conversation-folder__head--open': isOpen}">
@@ -34,12 +48,10 @@ ko.components.register('grouped-conversation-header', {
         <span class="cell-badge-dark conversation-folder__head__badge" data-bind="text: badge" data-uie-name="conversation-folder-badge"></span>
       <!-- /ko -->
     </div>
-  `,
-  viewModel: function ({conversationLabel, isOpen}: GroupedConversationHeaderParams): void {
-    this.label = conversationLabel;
-    this.isOpen = isOpen;
-    this.badge = ko.pureComputed(
-      () => conversationLabel.conversations().filter(conversation => conversation.hasUnread()).length,
-    );
+    `,
+  viewModel: {
+    createViewModel(params: GroupedConversationHeaderParams) {
+      return new GroupedConversationHeader(params);
+    },
   },
 });

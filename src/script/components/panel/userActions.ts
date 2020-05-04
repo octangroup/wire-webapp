@@ -44,7 +44,7 @@ export enum Actions {
   UNBLOCK = 'UserActions.UNBLOCK',
 }
 
-interface UserInputParams {
+interface UserActionsParams {
   actionsViewModel: ActionsViewModel;
   conversation: ko.Observable<Conversation> | (() => null);
   conversationRoleRepository: ConversationRoleRepository;
@@ -61,10 +61,10 @@ interface UserActionItem {
 }
 
 class UserActions {
-  isSelfActivated: boolean;
-  isMe: ko.Computed<boolean>;
-  isNotMe: ko.Computed<any>;
-  items: ko.Computed<UserActionItem[]>;
+  readonly isMe: ko.Computed<boolean>;
+  readonly isNotMe: ko.Computed<any>;
+  readonly isSelfActivated: boolean;
+  readonly items: ko.Computed<UserActionItem[]>;
 
   constructor({
     user,
@@ -73,7 +73,7 @@ class UserActions {
     onAction = noop,
     isSelfActivated,
     conversationRoleRepository,
-  }: UserInputParams) {
+  }: UserActionsParams) {
     this.isSelfActivated = ko.unwrap(isSelfActivated);
     this.isMe = ko.computed(() => user()?.isMe);
     this.isNotMe = ko.computed(() => !this.isMe() && this.isSelfActivated);
@@ -218,7 +218,7 @@ class UserActions {
 ko.components.register('user-actions', {
   template: '<panel-actions params="items: items()"></panel-actions>',
   viewModel: {
-    createViewModel(params: UserInputParams) {
+    createViewModel(params: UserActionsParams) {
       return new UserActions(params);
     },
   },

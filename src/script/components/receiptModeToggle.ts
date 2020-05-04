@@ -19,30 +19,34 @@
 
 import ko from 'knockout';
 import {Conversation} from '../entity/Conversation';
+import {ReceiptMode} from '../conversation/ReceiptMode';
 
 interface ReceiptModeToggleParams {
   conversation: ko.Observable<Conversation>;
   onReceiptModeChanged: (
     conversation: Conversation,
     data: {
-      receipt_mode: 1 | 0;
+      receipt_mode: ReceiptMode;
     },
   ) => void;
 }
 
 class ReceiptModeToggle {
-  conversation: Conversation;
-  updateValue: (data: any, event: Event) => void;
-  constructor(params: ReceiptModeToggleParams) {
-    this.conversation = ko.unwrap(params.conversation);
-    this.updateValue = (data: any, event: Event) => {
-      const intValue = (event.target as HTMLInputElement).checked ? 1 : 0;
-      this.conversation.receiptMode(intValue);
-      params.onReceiptModeChanged(this.conversation, {
-        receipt_mode: intValue,
-      });
-    };
+  readonly conversation: Conversation;
+  readonly onReceiptModeChanged: (conversation: Conversation, data: {receipt_mode: ReceiptMode}) => void;
+
+  constructor({conversation, onReceiptModeChanged}: ReceiptModeToggleParams) {
+    this.conversation = ko.unwrap(conversation);
+    this.onReceiptModeChanged = onReceiptModeChanged;
   }
+
+  updateValue = (_: unknown, event: Event) => {
+    const intValue = (event.target as HTMLInputElement).checked ? ReceiptMode.DELIVERY_AND_READ : ReceiptMode.DELIVERY;
+    this.conversation.receiptMode(intValue);
+    this.onReceiptModeChanged(this.conversation, {
+      receipt_mode: intValue,
+    });
+  };
 }
 
 ko.components.register('read-receipt-toggle', {
@@ -58,5 +62,9 @@ ko.components.register('read-receipt-toggle', {
   <div class="panel__info-text panel__info-text--margin" data-bind="text: t('receiptToggleInfo')" data-uie-name="status-info-toggle-receipt-mode"></div>
   `,
 
-  viewModel: ReceiptModeToggle,
+  viewModel: {
+    createViewModel(params: ReceiptModeToggleParams) {
+      return new ReceiptModeToggle(params);
+    },
+  },
 });

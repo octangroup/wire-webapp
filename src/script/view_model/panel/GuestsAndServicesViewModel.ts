@@ -25,7 +25,7 @@ import {copyText} from 'Util/ClipboardUtil';
 import {t} from 'Util/LocalizerUtil';
 
 import {Config} from '../../Config';
-import {BasePanelViewModel, PanelViewModelProps} from './BasePanelViewModel';
+import {BasePanelViewModel, PanelViewModelParams} from './BasePanelViewModel';
 import {ModalsViewModel} from '../ModalsViewModel';
 import {ACCESS_STATE} from '../../conversation/AccessState';
 import {WebAppEvents} from '../../event/WebApp';
@@ -51,7 +51,7 @@ export class GuestsAndServicesViewModel extends BasePanelViewModel {
     };
   }
 
-  constructor(params: PanelViewModelProps) {
+  constructor(params: PanelViewModelParams) {
     super(params);
 
     this.stateHandler = params.repositories.conversation.stateHandler;

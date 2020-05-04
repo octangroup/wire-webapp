@@ -29,13 +29,13 @@ interface InfoToggleParams {
 }
 
 class InfoToggle {
-  dataUieNameInfoText: string;
-  dataUieNameLabelText: string;
-  info: string;
-  inputId: UUID;
-  isChecked: ko.Observable<boolean>;
-  isDisabled: boolean;
-  name: string;
+  readonly dataUieNameInfoText: string;
+  readonly dataUieNameLabelText: string;
+  readonly info: string;
+  readonly inputId: UUID;
+  readonly isChecked: ko.Observable<boolean>;
+  readonly isDisabled: boolean;
+  readonly name: string;
 
   constructor(params: InfoToggleParams) {
     this.dataUieNameInfoText = `status-info-toggle-${params.dataUieName}`;
@@ -62,5 +62,9 @@ ko.components.register('info-toggle', {
     </div>
     <div class="info-toggle__details" data-bind="attr: {'data-uie-name': dataUieNameInfoText }, text: info"></div>
   `,
-  viewModel: InfoToggle,
+  viewModel: {
+    createViewModel(params: InfoToggleParams) {
+      return new InfoToggle(params);
+    },
+  },
 });

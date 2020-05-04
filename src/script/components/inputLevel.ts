@@ -25,10 +25,10 @@ interface InputLevelParams {
 }
 
 class InputLevel {
-  input_level: ko.Observable<number>;
-  disabled: ko.Observable<boolean>;
-  level_in_view: ko.PureComputed<number>;
-  bullet_count: number[];
+  readonly bullet_count: number[];
+  readonly disabled: ko.Observable<boolean>;
+  readonly input_level: ko.Observable<number>;
+  readonly level_in_view: ko.PureComputed<number>;
 
   constructor(params: InputLevelParams) {
     this.input_level = params.level;
@@ -56,5 +56,9 @@ ko.components.register('input-level', {
      <li class="input-level-bullet" data-bind="css: $parent.is_bullet_active($data)"></li>
     </ul>\
   `,
-  viewModel: InputLevel,
+  viewModel: {
+    createViewModel(params: InputLevelParams) {
+      return new InputLevel(params);
+    },
+  },
 });

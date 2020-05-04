@@ -23,7 +23,7 @@ import {amplify} from 'amplify';
 import {t} from 'Util/LocalizerUtil';
 import {formatLocale} from 'Util/TimeUtil';
 
-import {BasePanelViewModel, PanelViewModelProps} from './BasePanelViewModel';
+import {BasePanelViewModel, PanelViewModelParams} from './BasePanelViewModel';
 import {WebAppEvents} from '../../event/WebApp';
 import {SuperType} from '../../message/SuperType';
 import {Message, ReadReceipt} from '../../entity/message/Message';
@@ -54,7 +54,7 @@ export class MessageDetailsViewModel extends BasePanelViewModel {
   supportsReceipts: ko.PureComputed<boolean>;
   teamRepository: TeamRepository;
 
-  constructor(params: PanelViewModelProps) {
+  constructor(params: PanelViewModelParams) {
     super(params);
 
     amplify.subscribe(WebAppEvents.CONVERSATION.MESSAGE.UPDATED, (oldId: string, updatedMessageEntity: Message) => {

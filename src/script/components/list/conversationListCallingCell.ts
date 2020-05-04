@@ -39,7 +39,7 @@ import {Conversation} from '../../entity/Conversation';
 import {User} from '../../entity/User';
 import {CallActions} from '../../view_model/CallingViewModel';
 
-interface ComponentParams {
+interface ConversationListCallingCellParams {
   call: Call;
   conversation: ko.PureComputed<Conversation>;
   videoGrid: ko.PureComputed<Grid>;
@@ -61,7 +61,6 @@ class ConversationListCallingCell {
   readonly conversationUrl: string;
   readonly disableScreenButton: boolean;
   readonly disableVideoButton: ko.PureComputed<boolean>;
-  readonly dispose: () => void;
   readonly isConnecting: ko.PureComputed<boolean>;
   readonly isDeclined: ko.PureComputed<boolean>;
   readonly isIdle: ko.PureComputed<boolean>;
@@ -82,6 +81,8 @@ class ConversationListCallingCell {
   readonly videoGrid: ko.PureComputed<Grid>;
   readonly isSelfVerified: ko.Subscribable<boolean>;
   readonly users: ko.PureComputed<User[]>;
+  readonly startedAtSubscription: ko.Subscription;
+  callDurationUpdateInterval: number;
 
   constructor({
     call,
@@ -93,7 +94,7 @@ class ConversationListCallingCell {
     callActions,
     hasAccessToCamera,
     isSelfVerified = ko.observable(false),
-  }: ComponentParams) {
+  }: ConversationListCallingCellParams) {
     this.call = call;
     this.conversation = conversation;
     this.callingRepository = callingRepository;
@@ -126,15 +127,14 @@ class ConversationListCallingCell {
     this.isMuted = callingRepository.isMuted;
 
     this.callDuration = ko.observable();
-    let callDurationUpdateInterval: number;
-    const startedAtSubscription = call.startedAt.subscribe(startedAt => {
+    this.startedAtSubscription = call.startedAt.subscribe(startedAt => {
       if (startedAt) {
         const updateTimer = () => {
           const time = Math.floor((Date.now() - startedAt) / 1000);
           this.callDuration(formatSeconds(time));
         };
         updateTimer();
-        callDurationUpdateInterval = window.setInterval(updateTimer, 1000);
+        this.callDurationUpdateInterval = window.setInterval(updateTimer, 1000);
       }
     });
 
@@ -168,13 +168,13 @@ class ConversationListCallingCell {
     this.users = ko.pureComputed(() =>
       [call.selfParticipant, ...call.participants()].map(({userId}) => this.findUser(userId)).sort(sortUsersByPriority),
     );
-
-    this.dispose = () => {
-      window.clearInterval(callDurationUpdateInterval);
-      startedAtSubscription.dispose();
-      this.showNoCameraPreview.dispose();
-    };
   }
+
+  dispose = () => {
+    window.clearInterval(this.callDurationUpdateInterval);
+    this.startedAtSubscription.dispose();
+    this.showNoCameraPreview.dispose();
+  };
 
   endCall(call: Call): void {
     return this.isIncoming() ? this.callActions.reject(call) : this.callActions.leave(call);
@@ -315,5 +315,9 @@ ko.components.register('conversation-list-calling-cell', {
     <!-- /ko -->
   <!-- /ko -->
   `,
-  viewModel: ConversationListCallingCell,
+  viewModel: {
+    createViewModel(params: ConversationListCallingCellParams) {
+      return new ConversationListCallingCell(params);
+    },
+  },
 });

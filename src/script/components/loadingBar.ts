@@ -24,6 +24,16 @@ interface LoadingBarParams {
   message: ko.Subscribable<string>;
 }
 
+class LoadingBar {
+  readonly loadingMessage: ko.Subscribable<string>;
+  readonly loadingPercentage: ko.PureComputed<string>;
+
+  constructor({progress, message}: LoadingBarParams) {
+    this.loadingMessage = message;
+    this.loadingPercentage = ko.pureComputed(() => `${progress()}%`);
+  }
+}
+
 ko.components.register('loading-bar', {
   template: `
     <div class="text-center">
@@ -31,8 +41,9 @@ ko.components.register('loading-bar', {
       <div class="progress-bar"><div data-bind="style: {width: loadingPercentage}"></div></div>
     </div>
 `,
-  viewModel: function ({progress, message}: LoadingBarParams): void {
-    this.loadingMessage = message;
-    this.loadingPercentage = ko.pureComputed(() => `${progress()}%`);
+  viewModel: {
+    createViewModel(params: LoadingBarParams) {
+      return new LoadingBar(params);
+    },
   },
 });

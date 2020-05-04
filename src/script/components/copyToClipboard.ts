@@ -17,10 +17,14 @@
  *
  */
 
-class CopyToClipboard {
-  public readonly text: string;
+interface CopyToClipboardParams {
+  text: string;
+}
 
-  constructor(params: {text: string}) {
+class CopyToClipboard {
+  readonly text: string;
+
+  constructor(params: CopyToClipboardParams) {
     this.text = params.text;
   }
 
@@ -36,5 +40,9 @@ class CopyToClipboard {
 
 ko.components.register('copy-to-clipboard', {
   template: '<div class="copy-to-clipboard" data-bind="click: onClick, text: text()"></div>',
-  viewModel: CopyToClipboard,
+  viewModel: {
+    createViewModel(params: CopyToClipboardParams) {
+      return new CopyToClipboard(params);
+    },
+  },
 });

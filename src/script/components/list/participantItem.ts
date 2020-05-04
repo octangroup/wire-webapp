@@ -78,7 +78,7 @@ class ParticipantItem {
       external,
       isSelfVerified = ko.observable(false),
     }: ParticipantItemParams,
-    element: HTMLElement,
+    componentInfo: ko.components.ComponentInfo,
   ) {
     this.avatarSize = ParticipantAvatar.SIZE.SMALL;
     this.participant = ko.unwrap(participant);
@@ -116,11 +116,11 @@ class ParticipantItem {
     this.isInViewport = ko.observable(false);
 
     viewportObserver.trackElement(
-      element,
+      componentInfo.element as HTMLElement,
       (isInViewport: boolean) => {
         if (isInViewport) {
           this.isInViewport(true);
-          viewportObserver.removeElement(element);
+          viewportObserver.removeElement(componentInfo.element);
         }
       },
       false,
@@ -187,7 +187,8 @@ ko.components.register('participant-item', {
     </div>
   `,
   viewModel: {
-    createViewModel: (props: ParticipantItemParams, componentInfo: any) =>
-      new ParticipantItem(props, componentInfo.element),
+    createViewModel(params: ParticipantItemParams, componentInfo: ko.components.ComponentInfo) {
+      return new ParticipantItem(params, componentInfo);
+    },
   },
 });

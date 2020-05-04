@@ -28,10 +28,10 @@ interface GuestModeToggleParams {
 }
 
 class GuestModeToggle {
-  infoText: string;
-  isChecked: ko.Observable<boolean>;
-  isDisabled: boolean;
-  onToggle: ko.Observable<boolean>;
+  readonly infoText: string;
+  readonly isChecked: ko.Observable<boolean>;
+  readonly isDisabled: boolean;
+  readonly onToggle: ko.Observable<boolean>;
 
   constructor(params: GuestModeToggleParams) {
     this.isChecked = params.isChecked;
@@ -52,5 +52,9 @@ ko.components.register('guest-mode-toggle', {
     </div>
     <div class="info-toggle__details" data-bind="text: infoText" data-uie-name="status-guest-toggle"></div>
   `,
-  viewModel: GuestModeToggle,
+  viewModel: {
+    createViewModel(params: GuestModeToggleParams) {
+      return new GuestModeToggle(params);
+    },
+  },
 });

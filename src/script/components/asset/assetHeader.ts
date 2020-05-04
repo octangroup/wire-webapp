@@ -23,16 +23,15 @@ import {formatDayMonthNumeral, formatTimeShort} from 'Util/TimeUtil';
 
 import {Message} from '../../entity/message/Message';
 
-interface Params {
+interface AssetHeaderParams {
   message: Message;
 }
 
-ko.components.register('asset-header', {
-  template: `
-    <span class="asset-header-name" data-bind="text: message_et.user().name(), css: message_et.accent_color"></span>
-    <span class="asset-header-time" data-bind="text: timeText"></span>
-  `,
-  viewModel: function ({message}: Params): void {
+class AssetHeader {
+  message_et: Message;
+  timeText: ko.PureComputed<string>;
+
+  constructor({message}: AssetHeaderParams) {
     this.message_et = message;
     this.timeText = ko.pureComputed(() => {
       const timeStamp = message.timestamp();
@@ -40,5 +39,17 @@ ko.components.register('asset-header', {
       const time = formatTimeShort(timeStamp);
       return `${dayMonth} ${time}`;
     });
+  }
+}
+
+ko.components.register('asset-header', {
+  template: `
+    <span class="asset-header-name" data-bind="text: message_et.user().name(), css: message_et.accent_color"></span>
+    <span class="asset-header-time" data-bind="text: timeText"></span>
+  `,
+  viewModel: {
+    createViewModel(params: AssetHeaderParams) {
+      return new AssetHeader(params);
+    },
   },
 });

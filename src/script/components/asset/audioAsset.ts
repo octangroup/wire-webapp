@@ -27,28 +27,26 @@ import {ContentMessage} from '../../entity/message/ContentMessage';
 import {File as FileAsset} from '../../entity/message/File';
 import {AbstractAssetTransferStateTracker} from './AbstractAssetTransferStateTracker';
 
-interface Params {
-  message: ContentMessage;
-
+interface AudioAssetComponentParams {
   /** Does the asset have a visible header? */
   header: boolean;
+  message: ContentMessage;
 }
 
 class AudioAssetComponent extends AbstractAssetTransferStateTracker {
-  logger: Logger;
-  message: ContentMessage;
-  asset: FileAsset;
-  header: boolean;
-  audioSrc: ko.Observable<string>;
-  audioElement: HTMLAudioElement;
-  audioTime: ko.Observable<number>;
-  audioIsLoaded: ko.Observable<boolean>;
-  showLoudnessPreview: ko.PureComputed<boolean>;
-  formatSeconds: (duration: number) => string;
+  readonly asset: FileAsset;
+  readonly audioElement: HTMLAudioElement;
+  readonly audioIsLoaded: ko.Observable<boolean>;
+  readonly audioSrc: ko.Observable<string>;
+  readonly audioTime: ko.Observable<number>;
+  readonly formatSeconds: (duration: number) => string;
+  readonly header: boolean;
+  readonly logger: Logger;
+  readonly message: ContentMessage;
+  readonly showLoudnessPreview: ko.PureComputed<boolean>;
 
-  constructor({message, header = false}: Params, element: HTMLElement) {
+  constructor({message, header = false}: AudioAssetComponentParams, componentInfo: ko.components.ComponentInfo) {
     super(ko.unwrap(message));
-    this.dispose = this.dispose.bind(this);
     this.logger = getLogger('AudioAssetComponent');
 
     this.message = ko.unwrap(message);
@@ -56,7 +54,7 @@ class AudioAssetComponent extends AbstractAssetTransferStateTracker {
     this.header = header;
 
     this.audioSrc = ko.observable();
-    this.audioElement = element.querySelector('audio');
+    this.audioElement = (componentInfo.element as HTMLElement).querySelector('audio');
     this.audioTime = ko.observable(0);
     this.audioIsLoaded = ko.observable(false);
 
@@ -66,8 +64,8 @@ class AudioAssetComponent extends AbstractAssetTransferStateTracker {
       this.audioTime(this.asset.meta.duration);
     }
 
-    element.dataset.uieName = 'audio-asset';
-    element.dataset.uieValue = this.asset.file_name;
+    (componentInfo.element as HTMLElement).dataset.uieName = 'audio-asset';
+    (componentInfo.element as HTMLElement).dataset.uieValue = this.asset.file_name;
 
     this.formatSeconds = formatSeconds;
     this.AssetTransferState = AssetTransferState;
@@ -95,9 +93,9 @@ class AudioAssetComponent extends AbstractAssetTransferStateTracker {
     }
   };
 
-  dispose(): void {
+  dispose = () => {
     window.URL.revokeObjectURL(this.audioSrc());
-  }
+  };
 }
 
 ko.components.register('audio-asset', {
@@ -141,8 +139,8 @@ ko.components.register('audio-asset', {
     <!-- /ko -->
   `,
   viewModel: {
-    createViewModel(params: Params, {element}: ko.components.ComponentInfo): AudioAssetComponent {
-      return new AudioAssetComponent(params, element as HTMLElement);
+    createViewModel(params: AudioAssetComponentParams, componentInfo: ko.components.ComponentInfo) {
+      return new AudioAssetComponent(params, componentInfo);
     },
   },
 });

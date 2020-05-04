@@ -17,16 +17,68 @@
  *
  */
 
+import ko from 'knockout';
 import {ClientClassification} from '@wireapp/api-client/dist/client';
+
 import {ClientEntity} from '../client/ClientEntity';
 
 interface DeviceCardParams {
   click?: (device: ClientEntity) => void;
-  device: ClientEntity | ko.Observable<ClientEntity>;
-  detailed?: boolean;
   current?: boolean;
-  showVerified?: boolean;
+  detailed?: boolean;
+  device: ClientEntity | ko.Observable<ClientEntity>;
   showIcon?: boolean;
+  showVerified?: boolean;
+}
+
+class DeviceCard {
+  readonly click: (device: ClientEntity) => void;
+  readonly clickable: (device: ClientEntity) => void;
+  readonly clientEntity: ClientEntity;
+  readonly dataUieName: string;
+  readonly detailed: boolean;
+  readonly formattedId: string[];
+  readonly id: string;
+  readonly isCurrentClient: boolean;
+  readonly isVerified: ko.Observable<boolean>;
+  readonly label: string;
+  readonly name: string;
+  readonly showDesktopIcon: boolean;
+  readonly showLegalHoldIcon: boolean;
+  readonly showOtherIcon: boolean;
+  readonly showVerified: boolean;
+
+  constructor({
+    click,
+    device: wrappedDevice,
+    detailed = false,
+    current = false,
+    showVerified = false,
+    showIcon = false,
+  }: DeviceCardParams) {
+    this.clientEntity = ko.unwrap(wrappedDevice);
+    const {class: deviceClass = '?', id = '', label = '?', meta} = this.clientEntity;
+    this.formattedId = id ? this.clientEntity.formatId() : [];
+    this.id = id;
+    this.label = label;
+    this.name = this.clientEntity.getName();
+    this.click = click;
+    this.isCurrentClient = current;
+    this.detailed = detailed;
+    this.clickable = !detailed && click;
+    this.dataUieName = `device-card${current ? '-current' : ''}`;
+    this.isVerified = meta.isVerified;
+    this.showVerified = showVerified;
+    this.showLegalHoldIcon = showIcon && deviceClass === ClientClassification.LEGAL_HOLD;
+    this.showDesktopIcon = showIcon && deviceClass === ClientClassification.DESKTOP;
+    this.showOtherIcon = showIcon && !this.showLegalHoldIcon && !this.showDesktopIcon;
+  }
+
+  clickOnDevice = () => {
+    if (typeof this.click === 'function') {
+      this.click(this.clientEntity);
+    }
+  };
 }
 
 ko.components.register('device-card', {
@@ -74,36 +126,9 @@ ko.components.register('device-card', {
       <!-- /ko -->
     </div>
   `,
-  viewModel: function ({
-    click,
-    device: wrappedDevice,
-    detailed = false,
-    current = false,
-    showVerified = false,
-    showIcon = false,
-  }: DeviceCardParams): void {
-    const clientEntity = ko.unwrap(wrappedDevice);
-    const {class: deviceClass = '?', id = '', label = '?', meta} = clientEntity;
-    this.formattedId = id ? clientEntity.formatId() : [];
-    this.id = id;
-    this.label = label;
-    this.name = clientEntity.getName();
-
-    this.isCurrentClient = current;
-    this.detailed = detailed;
-    this.clickable = !detailed && click;
-
-    this.dataUieName = `device-card${current ? '-current' : ''}`;
-    this.isVerified = meta.isVerified;
-    this.showVerified = showVerified;
-    this.showLegalHoldIcon = showIcon && deviceClass === ClientClassification.LEGAL_HOLD;
-    this.showDesktopIcon = showIcon && deviceClass === ClientClassification.DESKTOP;
-    this.showOtherIcon = showIcon && !this.showLegalHoldIcon && !this.showDesktopIcon;
-
-    this.clickOnDevice = () => {
-      if (typeof click === 'function') {
-        click(clientEntity);
-      }
-    };
+  viewModel: {
+    createViewModel(params: DeviceCardParams) {
+      return new DeviceCard(params);
+    },
   },
 });

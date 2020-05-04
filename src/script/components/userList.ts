@@ -63,63 +63,35 @@ interface UserListParams {
   noSelfInteraction: boolean;
 }
 
-const listTemplate = (data: string, uieName: string = ''): string => `
-  <div class="search-list" data-bind="
-      css: cssClasses(),
-      foreach: {data: ${data}, as: 'user', noChildContext: true }"
-      ${uieName ? ` data-uie-name="${uieName}"` : ''}>
-    <!-- ko if: noSelfInteraction && user.isMe -->
-      <participant-item
-        params="participant: user, customInfo: infos && infos()[user.id], canSelect: isSelectEnabled, isSelected: isSelected(user), mode: mode, external: teamRepository.isExternal(user.id), selfInTeam: selfInTeam, isSelfVerified: isSelfVerified"
-        data-bind="css: {'no-underline': noUnderline, 'highlighted': highlightedUserIds.includes(user.id), 'no-interaction': true}">
-      </participant-item>
-    <!-- /ko -->
-    <!-- ko ifnot: noSelfInteraction && user.isMe -->
-      <participant-item
-        params="participant: user, customInfo: infos && infos()[user.id], canSelect: isSelectEnabled, isSelected: isSelected(user), mode: mode, external: teamRepository.isExternal(user.id), selfInTeam: selfInTeam, isSelfVerified: isSelfVerified"
-        data-bind="click: (viewmodel, event) => onUserClick(user, event), css: {'no-underline': noUnderline, 'show-arrow': arrow, 'highlighted': highlightedUserIds.includes(user.id)}">
-      </participant-item>
-    <!-- /ko -->
-  </div>
-`;
+class UserList {
+  adminCount: ko.Observable<number>;
+  adminUsers: ko.Observable<User[]>;
+  arrow: boolean;
+  click: (userEntity: User, event: MouseEvent) => void;
+  cssClasses: ko.PureComputed<string>;
+  filter: ko.Observable<string>;
+  filteredUsersSubscription: ko.Computed<void>;
+  foundUserEntities: ko.PureComputed<any[]>;
+  highlightedUserIds: string[];
+  infos: Record<string, string>;
+  isSelectEnabled: boolean;
+  isSelfVerified: ko.PureComputed<boolean>;
+  lazyTriggerElement: any;
+  maxShownUsers: ko.Observable<number>;
+  memberCount: ko.Observable<number>;
+  memberUsers: ko.Observable<User[]>;
+  mode: UserlistMode;
+  noSelfInteraction: boolean;
+  noUnderline: boolean;
+  selectedUsers: ko.ObservableArray<User>;
+  selfInTeam: boolean;
+  showEmptyAdmin: boolean;
+  showRoles: ko.PureComputed<boolean>;
+  teamRepository: TeamRepository;
+  userEntities: ko.Observable<User[]>;
+  users: ko.Observable<User[]>;
 
-ko.components.register('user-list', {
-  template: `
-    <!-- ko if: showRoles() -->
-      <!-- ko if: adminUsers().length > 0 || showEmptyAdmin -->
-        <div class="user-list__header" data-bind="text: t('searchListAdmins', adminCount())" data-uie-name="label-conversation-admins"></div>
-        <!-- ko if: adminUsers().length > 0 -->
-          ${listTemplate('adminUsers().slice(0, maxShownUsers())', 'list-admins')}
-        <!-- /ko -->
-        <!-- ko ifnot: adminUsers().length > 0 -->
-          <div class="user-list__no-admin" data-bind="text: t('searchListNoAdmins')" data-uie-name="status-no-admins"></div>
-        <!-- /ko -->
-      <!-- /ko -->
-      <!-- ko if: memberUsers().length > 0 && maxShownUsers() > adminUsers().length -->
-        <div class="user-list__header" data-bind="text: t('searchListMembers', memberCount())" data-uie-name="label-conversation-members"></div>
-        ${listTemplate('memberUsers().slice(0, maxShownUsers() - adminUsers().length)', 'list-members')}
-      <!-- /ko -->
-    <!-- /ko -->
-
-    <!-- ko ifnot: showRoles() -->
-    ${listTemplate('foundUserEntities().slice(0, maxShownUsers())')}
-    <!-- /ko -->
-
-    <!-- ko if: foundUserEntities().length > maxShownUsers() -->
-      <div data-bind="template: {afterRender: attachLazyTrigger}"><div style="height: 100px"></div></div>
-    <!-- /ko -->
-
-    <!-- ko if: typeof filter === 'function' -->
-      <!-- ko if: userEntities().length === 0 -->
-        <div class="user-list__no-results" data-bind="text: t('searchListEveryoneParticipates')" data-uie-name="status-all-added"></div>
-      <!-- /ko -->
-
-      <!-- ko if: userEntities().length > 0 && foundUserEntities().length === 0 -->
-        <div class="user-list__no-results" data-bind="text: t('searchListNoMatches')" data-uie-name="status-no-matches"></div>
-      <!-- /ko -->
-    <!-- /ko -->
-  `,
-  viewModel: function ({
+  constructor({
     click,
     filter = ko.observable(''),
     skipSearch = false,
@@ -140,9 +112,10 @@ ko.components.register('user-list', {
     showEmptyAdmin = false,
     selfFirst = true,
     noSelfInteraction = false,
-  }: UserListParams): void {
+  }: UserListParams) {
     this.filter = filter;
     this.mode = mode;
+    this.click = click;
     this.teamRepository = teamRepository;
     this.userEntities = userEntities;
     this.infos = infos;
@@ -159,23 +132,11 @@ ko.components.register('user-list', {
     this.lazyTriggerElement = null;
     this.adminCount = ko.observable(0);
     this.memberCount = ko.observable(0);
+    this.selectedUsers = selectedUsers;
 
     const isCompactMode = mode === UserlistMode.COMPACT;
 
     this.cssClasses = ko.pureComputed(() => (isCompactMode ? 'search-list-sm' : 'search-list-lg'));
-
-    this.onUserClick = (userEntity: User, event: MouseEvent) => {
-      if (this.isSelectEnabled) {
-        if (this.isSelected(userEntity)) {
-          selectedUsers.remove(userEntity);
-        } else {
-          selectedUsers.push(userEntity);
-        }
-      }
-      if (typeof click === 'function') {
-        click(userEntity, event);
-      }
-    };
 
     const remoteTeamMembers = ko.observable([]);
 
@@ -243,33 +204,11 @@ ko.components.register('user-list', {
       );
     });
 
-    this.isSelected = (userEntity: User): boolean => this.isSelectEnabled && selectedUsers().includes(userEntity);
-
-    this.attachLazyTrigger = ([element]: [HTMLElement]): void => {
-      viewportObserver.trackElement(
-        element,
-        (isInViewport: boolean) => {
-          if (isInViewport) {
-            this.maxShownUsers(this.maxShownUsers() + USER_CHUNK_SIZE);
-          }
-        },
-        false,
-        undefined,
-      );
-      this.lazyTriggerElement = element;
-    };
-
-    this.dispose = () => {
-      if (this.lazyTriggerElement) {
-        viewportObserver.removeElement(this.lazyTriggerElement);
-      }
-    };
-
     this.memberUsers = ko.observable<User[]>([]);
     this.adminUsers = ko.observable<User[]>([]);
     this.users = ko.observable<User[]>([]);
 
-    const filteredUsersSubscription = ko.computed(() => {
+    this.filteredUsersSubscription = ko.computed(() => {
       const users = filteredUserEntities();
       if (conversation?.()) {
         const members: User[] = [];
@@ -300,9 +239,104 @@ ko.components.register('user-list', {
         this.users(users);
       }
     });
+  }
 
-    this.dispose = () => {
-      filteredUsersSubscription.dispose();
-    };
+  isSelected = (userEntity: User): boolean => this.isSelectEnabled && this.selectedUsers().includes(userEntity);
+
+  attachLazyTrigger = ([element]: [HTMLElement]): void => {
+    viewportObserver.trackElement(
+      element,
+      (isInViewport: boolean) => {
+        if (isInViewport) {
+          this.maxShownUsers(this.maxShownUsers() + USER_CHUNK_SIZE);
+        }
+      },
+      false,
+      undefined,
+    );
+    this.lazyTriggerElement = element;
+  };
+
+  onUserClick = (userEntity: User, event: MouseEvent) => {
+    if (this.isSelectEnabled) {
+      if (this.isSelected(userEntity)) {
+        this.selectedUsers.remove(userEntity);
+      } else {
+        this.selectedUsers.push(userEntity);
+      }
+    }
+    if (typeof this.click === 'function') {
+      this.click(userEntity, event);
+    }
+  };
+
+  dispose = () => {
+    if (this.lazyTriggerElement) {
+      viewportObserver.removeElement(this.lazyTriggerElement);
+    }
+    this.filteredUsersSubscription.dispose();
+  };
+}
+
+const listTemplate = (data: string, uieName: string = ''): string => `
+  <div class="search-list" data-bind="
+      css: cssClasses(),
+      foreach: {data: ${data}, as: 'user', noChildContext: true }"
+      ${uieName ? ` data-uie-name="${uieName}"` : ''}>
+    <!-- ko if: noSelfInteraction && user.isMe -->
+      <participant-item
+        params="participant: user, customInfo: infos && infos()[user.id], canSelect: isSelectEnabled, isSelected: isSelected(user), mode: mode, external: teamRepository.isExternal(user.id), selfInTeam: selfInTeam, isSelfVerified: isSelfVerified"
+        data-bind="css: {'no-underline': noUnderline, 'highlighted': highlightedUserIds.includes(user.id), 'no-interaction': true}">
+      </participant-item>
+    <!-- /ko -->
+    <!-- ko ifnot: noSelfInteraction && user.isMe -->
+      <participant-item
+        params="participant: user, customInfo: infos && infos()[user.id], canSelect: isSelectEnabled, isSelected: isSelected(user), mode: mode, external: teamRepository.isExternal(user.id), selfInTeam: selfInTeam, isSelfVerified: isSelfVerified"
+        data-bind="click: (viewmodel, event) => onUserClick(user, event), css: {'no-underline': noUnderline, 'show-arrow': arrow, 'highlighted': highlightedUserIds.includes(user.id)}">
+      </participant-item>
+    <!-- /ko -->
+  </div>
+`;
+
+ko.components.register('user-list', {
+  template: `
+    <!-- ko if: showRoles() -->
+      <!-- ko if: adminUsers().length > 0 || showEmptyAdmin -->
+        <div class="user-list__header" data-bind="text: t('searchListAdmins', adminCount())" data-uie-name="label-conversation-admins"></div>
+        <!-- ko if: adminUsers().length > 0 -->
+          ${listTemplate('adminUsers().slice(0, maxShownUsers())', 'list-admins')}
+        <!-- /ko -->
+        <!-- ko ifnot: adminUsers().length > 0 -->
+          <div class="user-list__no-admin" data-bind="text: t('searchListNoAdmins')" data-uie-name="status-no-admins"></div>
+        <!-- /ko -->
+      <!-- /ko -->
+      <!-- ko if: memberUsers().length > 0 && maxShownUsers() > adminUsers().length -->
+        <div class="user-list__header" data-bind="text: t('searchListMembers', memberCount())" data-uie-name="label-conversation-members"></div>
+        ${listTemplate('memberUsers().slice(0, maxShownUsers() - adminUsers().length)', 'list-members')}
+      <!-- /ko -->
+    <!-- /ko -->
+
+    <!-- ko ifnot: showRoles() -->
+    ${listTemplate('foundUserEntities().slice(0, maxShownUsers())')}
+    <!-- /ko -->
+
+    <!-- ko if: foundUserEntities().length > maxShownUsers() -->
+      <div data-bind="template: {afterRender: attachLazyTrigger}"><div style="height: 100px"></div></div>
+    <!-- /ko -->
+
+    <!-- ko if: typeof filter === 'function' -->
+      <!-- ko if: userEntities().length === 0 -->
+        <div class="user-list__no-results" data-bind="text: t('searchListEveryoneParticipates')" data-uie-name="status-all-added"></div>
+      <!-- /ko -->
+
+      <!-- ko if: userEntities().length > 0 && foundUserEntities().length === 0 -->
+        <div class="user-list__no-results" data-bind="text: t('searchListNoMatches')" data-uie-name="status-no-matches"></div>
+      <!-- /ko -->
+    <!-- /ko -->
+  `,
+  viewModel: {
+    createViewModel(params: UserListParams) {
+      return new UserList(params);
+    },
   },
 });

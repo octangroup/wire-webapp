@@ -29,6 +29,40 @@ interface ModalParams {
   showLoading: ko.Observable<boolean>;
 }
 
+class Modal {
+  readonly displayNone: ko.Observable<boolean>;
+  readonly hasVisibleClass: ko.Computed<boolean>;
+  readonly isShownSubscription: ko.Subscription;
+  readonly large: boolean;
+  readonly onBgClick: () => void;
+  readonly showLoading: ko.Observable<boolean>;
+  timeoutId: number;
+
+  constructor({isShown, large, onBgClick = noop, onClosed = noop, showLoading = ko.observable(false)}: ModalParams) {
+    this.large = large;
+    this.onBgClick = ko.unwrap(onBgClick);
+    this.displayNone = ko.observable(!ko.unwrap(isShown));
+    this.hasVisibleClass = ko.computed(() => isShown() && !this.displayNone()).extend({rateLimit: 20});
+    this.showLoading = showLoading;
+    this.timeoutId = 0;
+    this.isShownSubscription = isShown.subscribe(visible => {
+      if (visible) {
+        return this.displayNone(false);
+      }
+      this.timeoutId = window.setTimeout(() => {
+        this.displayNone(true);
+        onClosed();
+      }, 150);
+    });
+  }
+
+  dispose = () => {
+    this.isShownSubscription.dispose();
+    this.hasVisibleClass.dispose();
+    window.clearTimeout(this.timeoutId);
+  };
+}
+
 ko.components.register('modal', {
   template: `
     <div class="modal__overlay" data-bind="click: () => onBgClick(), css: {'modal__overlay--visible': hasVisibleClass()}, style: {display: displayNone() ? 'none': 'flex'}" >
@@ -42,33 +76,9 @@ ko.components.register('modal', {
       <!-- /ko -->
     </div>
     `,
-  viewModel: function ({
-    isShown,
-    large,
-    onBgClick = noop,
-    onClosed = noop,
-    showLoading = ko.observable(false),
-  }: ModalParams): void {
-    this.large = large;
-    this.onBgClick = () => ko.unwrap(onBgClick)();
-    this.displayNone = ko.observable(!ko.unwrap(isShown));
-    this.hasVisibleClass = ko.computed(() => isShown() && !this.displayNone()).extend({rateLimit: 20});
-    this.showLoading = showLoading;
-    let timeoutId = 0;
-    const isShownSubscription = isShown.subscribe(visible => {
-      if (visible) {
-        return this.displayNone(false);
-      }
-      timeoutId = window.setTimeout(() => {
-        this.displayNone(true);
-        onClosed();
-      }, 150);
-    });
-
-    this.dispose = () => {
-      isShownSubscription.dispose();
-      this.hasVisibleClass.dispose();
-      window.clearTimeout(timeoutId);
-    };
+  viewModel: {
+    createViewModel(params: ModalParams) {
+      return new Modal(params);
+    },
   },
 });

@@ -26,7 +26,7 @@ import {File as FileAsset} from '../../entity/message/File';
 import {AbstractAssetTransferStateTracker} from './AbstractAssetTransferStateTracker';
 import './assetLoader';
 
-interface Params {
+interface FileAssetComponentParams {
   message: ContentMessage | ko.Subscribable<ContentMessage>;
 
   /** Does the asset have a visible header? */
@@ -41,7 +41,7 @@ class FileAssetComponent extends AbstractAssetTransferStateTracker {
   readonly fileName: string;
   readonly fileExtension: string;
 
-  constructor({message, header = false}: Params) {
+  constructor({message, header = false}: FileAssetComponentParams) {
     super(ko.unwrap(message));
     this.message = ko.unwrap(message);
     this.asset = this.message.get_first_asset() as FileAsset;
@@ -107,7 +107,7 @@ ko.components.register('file-asset', {
     <!-- /ko -->
   `,
   viewModel: {
-    createViewModel(params: Params): FileAssetComponent {
+    createViewModel(params: FileAssetComponentParams) {
       return new FileAssetComponent(params);
     },
   },

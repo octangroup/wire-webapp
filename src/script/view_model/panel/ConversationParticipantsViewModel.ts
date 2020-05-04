@@ -26,7 +26,7 @@ import {User} from '../../entity/User';
 import {MotionDuration} from '../../motion/MotionDuration';
 import {SearchRepository} from '../../search/SearchRepository';
 import {TeamRepository} from '../../team/TeamRepository';
-import {BasePanelViewModel, PanelViewModelProps} from './BasePanelViewModel';
+import {BasePanelViewModel, PanelViewModelParams} from './BasePanelViewModel';
 
 export class ConversationParticipantsViewModel extends BasePanelViewModel {
   searchRepository: SearchRepository;
@@ -36,7 +36,7 @@ export class ConversationParticipantsViewModel extends BasePanelViewModel {
   highlightedUsers: ko.Observable<User[]>;
   searchInput: ko.Observable<string>;
   MotionDuration: typeof MotionDuration;
-  constructor(params: PanelViewModelProps) {
+  constructor(params: PanelViewModelParams) {
     super(params);
     this.clickOnShowUser = this.clickOnShowUser.bind(this);
 

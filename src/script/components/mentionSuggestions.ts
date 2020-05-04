@@ -34,19 +34,19 @@ interface MentionSuggestionsParams {
 }
 
 class MentionSuggestions {
-  isVisible: ko.Observable<boolean>;
-  onSelectionValidated: (data: User, element: HTMLInputElement) => void | (() => void);
-  ParticipantAvatar: typeof ParticipantAvatar;
-  position: ko.Observable<{}>;
+  readonly isVisible: ko.Observable<boolean>;
+  readonly onSelectionValidated: (data: User, element: HTMLInputElement) => void | (() => void);
+  readonly ParticipantAvatar: typeof ParticipantAvatar;
+  readonly position: ko.Observable<{}>;
+  readonly selectedSuggestion: ko.PureComputed<User>;
+  readonly selectedSuggestionIndex: ko.Observable<number>;
+  readonly selectedSuggestionIndexSubscription: ko.Subscription;
+  readonly shouldUpdateScrollbar: ko.PureComputed<User[]>;
+  readonly suggestions: ko.PureComputed<User[]>;
+  readonly suggestionSubscription: ko.Subscription;
+  readonly targetInputSelector: string;
   scrollElement: Element;
-  selectedSuggestion: ko.PureComputed<User>;
-  selectedSuggestionIndex: ko.Observable<number>;
-  selectedSuggestionIndexSubscription: ko.Subscription;
-  shouldUpdateScrollbar: ko.PureComputed<User[]>;
-  suggestions: ko.PureComputed<User[]>;
-  suggestionSubscription: ko.Subscription;
   targetInput: HTMLInputElement;
-  targetInputSelector: string;
 
   constructor(params: MentionSuggestionsParams) {
     this.isVisible = ko.observable(false);
@@ -218,5 +218,9 @@ ko.components.register('mention-suggestions', {
     </div>
   <!-- /ko -->`,
 
-  viewModel: MentionSuggestions,
+  viewModel: {
+    createViewModel(params: MentionSuggestionsParams) {
+      return new MentionSuggestions(params);
+    },
+  },
 });

@@ -17,13 +17,15 @@
  *
  */
 
-import {t} from 'Util/LocalizerUtil';
-import {getLogger} from 'Util/Logger';
-import {capitalizeFirstChar} from 'Util/StringUtil';
-
+import ko from 'knockout';
 import {amplify} from 'amplify';
 import Dexie from 'dexie';
-import ko from 'knockout';
+import {ClientClassification} from '@wireapp/api-client/dist/client';
+
+import {t} from 'Util/LocalizerUtil';
+import {getLogger, Logger} from 'Util/Logger';
+import {capitalizeFirstChar} from 'Util/StringUtil';
+
 import {ClientEntity} from '../client/ClientEntity';
 import {ClientRepository} from '../client/ClientRepository';
 import {Config} from '../Config';
@@ -34,7 +36,6 @@ import {WebAppEvents} from '../event/WebApp';
 import {getPrivacyHowUrl, getPrivacyWhyUrl, getPrivacyPolicyUrl} from '../externalRoute';
 import {MotionDuration} from '../motion/MotionDuration';
 
-import {ClientClassification} from '@wireapp/api-client/dist/client';
 import 'Components/deviceCard';
 
 export interface UserDevicesHistory {
@@ -75,7 +76,9 @@ export const makeUserDevicesHistory = (): UserDevicesHistory => {
     history.removeAll();
     history.push(UserDevicesState.DEVICE_LIST);
   };
+
   reset();
+
   return {
     current,
     goBack: () => {
@@ -96,6 +99,144 @@ export const sortUserDevices = (devices: ClientEntity[]): ClientEntity[] => {
   const otherDevices = devices.filter(device => device.class !== ClientClassification.LEGAL_HOLD);
   return legalholdDevices.concat(otherDevices);
 };
+
+class UserDevices {
+  clientEntities: ko.ObservableArray<ClientEntity>;
+  clientRepository: ClientRepository;
+  conversationRepository: ConversationRepository;
+  cryptographyRepository: CryptographyRepository;
+  detailMessage: ko.PureComputed<string>;
+  deviceMode: ko.Observable<FIND_MODE>;
+  devicesHeadlineText: ko.PureComputed<string>;
+  fingerprintLocal: ko.ObservableArray<string>;
+  fingerprintRemote: ko.ObservableArray<string>;
+  history: UserDevicesHistory;
+  isResettingSession: ko.Observable<boolean>;
+  logger: Logger;
+  noDevicesHeadlineText: ko.PureComputed<string>;
+  noPadding: boolean;
+  privacyHowUrl: string;
+  privacyPolicyUrl: string;
+  privacyWhyUrl: string;
+  selectedClient: ko.Observable<ClientEntity>;
+  selectedClientSubscription: ko.Subscription;
+  selfClient: ko.Observable<ClientEntity>;
+  userEntity: ko.Observable<User>;
+
+  constructor({
+    clientRepository,
+    conversationRepository,
+    cryptographyRepository,
+    userEntity,
+    history,
+    noPadding = false,
+  }: UserDevicesParams) {
+    this.selfClient = clientRepository.currentClient;
+    this.clientEntities = ko.observableArray();
+    this.noPadding = noPadding;
+    this.history = history;
+    this.conversationRepository = conversationRepository;
+    this.userEntity = userEntity;
+
+    const brandName = Config.getConfig().BRAND_NAME;
+    this.logger = getLogger('UserDevices');
+
+    this.isResettingSession = ko.observable(false);
+    this.fingerprintLocal = ko.observableArray([]);
+    this.fingerprintRemote = ko.observableArray([]);
+    this.deviceMode = ko.observable(FIND_MODE.REQUESTING);
+    this.selectedClient = ko.observable();
+    this.privacyPolicyUrl = getPrivacyPolicyUrl();
+    this.privacyHowUrl = getPrivacyHowUrl();
+    this.privacyWhyUrl = getPrivacyWhyUrl();
+
+    clientRepository
+      .getClientsByUserId(userEntity().id)
+      .then((clientEntities: ClientEntity[]) => {
+        this.clientEntities(sortUserDevices(clientEntities));
+        const hasDevices = clientEntities.length > 0;
+        const deviceMode = hasDevices ? FIND_MODE.FOUND : FIND_MODE.NOT_FOUND;
+        this.deviceMode(deviceMode);
+      })
+      .catch(error => {
+        this.logger.error(`Unable to retrieve clients for user '${userEntity().id}': ${error.message || error}`);
+      });
+
+    this.detailMessage = ko.pureComputed(() => {
+      return userEntity() ? t('participantDevicesDetailHeadline', {user: userEntity().name()}) : '';
+    });
+
+    this.devicesHeadlineText = ko.pureComputed(() => {
+      return userEntity() ? t('participantDevicesHeadline', {brandName, user: userEntity().name()}) : '';
+    });
+
+    this.noDevicesHeadlineText = ko.pureComputed(() => {
+      return userEntity()
+        ? t('participantDevicesOutdatedClientMessage', {
+            brandName,
+            user: userEntity().name(),
+          })
+        : '';
+    });
+
+    this.selectedClientSubscription = this.selectedClient.subscribe(() => {
+      this.fingerprintRemote([]);
+
+      if (this.selectedClient()) {
+        cryptographyRepository
+          .getRemoteFingerprint(userEntity().id, this.selectedClient().id)
+          .then(remoteFingerprint => this.fingerprintRemote(remoteFingerprint));
+      }
+    });
+  }
+
+  showDeviceList = () => this.history.current() === UserDevicesState.DEVICE_LIST;
+  showDeviceDetails = () => this.history.current() === UserDevicesState.DEVICE_DETAILS;
+  showSelfFingerprint = () => this.history.current() === UserDevicesState.SELF_FINGERPRINT;
+  showDevicesFound = () => this.showDeviceList() && this.deviceMode() === FIND_MODE.FOUND;
+  showDevicesNotFound = () => this.showDeviceList() && this.deviceMode() === FIND_MODE.NOT_FOUND;
+
+  clickOnDevice = (clientEntity: ClientEntity) => {
+    this.selectedClient(clientEntity);
+    const headline = this.userEntity().isMe
+      ? this.selectedClient().label || this.selectedClient().model
+      : capitalizeFirstChar(this.selectedClient().class);
+    this.history.goTo(UserDevicesState.DEVICE_DETAILS, headline);
+  };
+
+  clickOnShowSelfDevices = () => amplify.publish(WebAppEvents.PREFERENCES.MANAGE_DEVICES);
+
+  clickToResetSession = () => {
+    const _resetProgress = () => window.setTimeout(() => this.isResettingSession(false), MotionDuration.LONG);
+    const conversationId = this.userEntity().isMe
+      ? this.conversationRepository.self_conversation().id
+      : this.conversationRepository.active_conversation().id;
+    this.isResettingSession(true);
+    this.conversationRepository
+      .reset_session(this.userEntity().id, this.selectedClient().id, conversationId)
+      .then(_resetProgress)
+      .catch(_resetProgress);
+  };
+
+  clickToShowSelfFingerprint = () => {
+    if (!this.fingerprintLocal().length) {
+      this.fingerprintLocal([this.cryptographyRepository.getLocalFingerprint()]);
+    }
+    this.history.goTo(UserDevicesState.SELF_FINGERPRINT, t('participantDevicesSelfFingerprint'));
+  };
+
+  clickToToggleDeviceVerification = () => {
+    const toggleVerified = !this.selectedClient().meta.isVerified();
+    this.clientRepository
+      .verifyClient(this.userEntity().id, this.selectedClient(), toggleVerified)
+      .catch((error: Dexie.DexieError) => this.logger.warn(`Failed to toggle client verification: ${error.message}`));
+  };
+
+  dispose = () => {
+    this.selectedClientSubscription.dispose();
+    this.history.reset();
+  };
+}
 
 ko.components.register('user-devices', {
   template: `
@@ -159,114 +300,9 @@ ko.components.register('user-devices', {
       <!-- /ko -->
     </div>
   `,
-  viewModel: function ({
-    clientRepository,
-    conversationRepository,
-    cryptographyRepository,
-    userEntity,
-    history,
-    noPadding = false,
-  }: UserDevicesParams): void {
-    this.selfClient = clientRepository.currentClient;
-    this.clientEntities = ko.observableArray();
-    this.noPadding = noPadding;
-
-    const brandName = Config.getConfig().BRAND_NAME;
-    const logger = getLogger('UserDevices');
-
-    this.isResettingSession = ko.observable(false);
-    this.fingerprintLocal = ko.observableArray([]);
-    this.fingerprintRemote = ko.observableArray([]);
-    this.deviceMode = ko.observable(FIND_MODE.REQUESTING);
-    this.selectedClient = ko.observable();
-    this.privacyPolicyUrl = getPrivacyPolicyUrl();
-    this.privacyHowUrl = getPrivacyHowUrl();
-    this.privacyWhyUrl = getPrivacyWhyUrl();
-
-    const showDeviceList = () => history.current() === UserDevicesState.DEVICE_LIST;
-    this.showDeviceDetails = () => history.current() === UserDevicesState.DEVICE_DETAILS;
-    this.showSelfFingerprint = () => history.current() === UserDevicesState.SELF_FINGERPRINT;
-    this.showDevicesFound = () => showDeviceList() && this.deviceMode() === FIND_MODE.FOUND;
-    this.showDevicesNotFound = () => showDeviceList() && this.deviceMode() === FIND_MODE.NOT_FOUND;
-
-    clientRepository
-      .getClientsByUserId(userEntity().id)
-      .then((clientEntities: ClientEntity[]) => {
-        this.clientEntities(sortUserDevices(clientEntities));
-        const hasDevices = clientEntities.length > 0;
-        const deviceMode = hasDevices ? FIND_MODE.FOUND : FIND_MODE.NOT_FOUND;
-        this.deviceMode(deviceMode);
-      })
-      .catch(error => {
-        logger.error(`Unable to retrieve clients for user '${userEntity().id}': ${error.message || error}`);
-      });
-
-    this.detailMessage = ko.pureComputed(() => {
-      return userEntity() ? t('participantDevicesDetailHeadline', {user: userEntity().name()}) : '';
-    });
-
-    this.devicesHeadlineText = ko.pureComputed(() => {
-      return userEntity() ? t('participantDevicesHeadline', {brandName, user: userEntity().name()}) : '';
-    });
-
-    this.noDevicesHeadlineText = ko.pureComputed(() => {
-      return userEntity()
-        ? t('participantDevicesOutdatedClientMessage', {
-            brandName,
-            user: userEntity().name(),
-          })
-        : '';
-    });
-
-    const selectedClientSubscription = this.selectedClient.subscribe(() => {
-      this.fingerprintRemote([]);
-
-      if (this.selectedClient()) {
-        cryptographyRepository
-          .getRemoteFingerprint(userEntity().id, this.selectedClient().id)
-          .then(remoteFingerprint => this.fingerprintRemote(remoteFingerprint));
-      }
-    });
-
-    this.clickOnDevice = (clientEntity: ClientEntity) => {
-      this.selectedClient(clientEntity);
-      const headline = userEntity().isMe
-        ? this.selectedClient().label || this.selectedClient().model
-        : capitalizeFirstChar(this.selectedClient().class);
-      history.goTo(UserDevicesState.DEVICE_DETAILS, headline);
-    };
-
-    this.clickOnShowSelfDevices = () => amplify.publish(WebAppEvents.PREFERENCES.MANAGE_DEVICES);
-
-    this.clickToResetSession = () => {
-      const _resetProgress = () => window.setTimeout(() => this.isResettingSession(false), MotionDuration.LONG);
-      const conversationId = userEntity().isMe
-        ? conversationRepository.self_conversation().id
-        : conversationRepository.active_conversation().id;
-      this.isResettingSession(true);
-      conversationRepository
-        .reset_session(userEntity().id, this.selectedClient().id, conversationId)
-        .then(_resetProgress)
-        .catch(_resetProgress);
-    };
-
-    this.clickToShowSelfFingerprint = () => {
-      if (!this.fingerprintLocal().length) {
-        this.fingerprintLocal(cryptographyRepository.getLocalFingerprint());
-      }
-      history.goTo(UserDevicesState.SELF_FINGERPRINT, t('participantDevicesSelfFingerprint'));
-    };
-
-    this.clickToToggleDeviceVerification = () => {
-      const toggleVerified = !this.selectedClient().meta.isVerified();
-      clientRepository
-        .verifyClient(userEntity().id, this.selectedClient(), toggleVerified)
-        .catch((error: Dexie.DexieError) => logger.warn(`Failed to toggle client verification: ${error.message}`));
-    };
-
-    this.dispose = () => {
-      selectedClientSubscription.dispose();
-      history.reset();
-    };
+  viewModel: {
+    createViewModel(params: UserDevicesParams) {
+      return new UserDevices(params);
+    },
   },
 });

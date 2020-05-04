@@ -21,7 +21,7 @@ import ko from 'knockout';
 
 import {makeUserDevicesHistory, UserDevicesState, UserDevicesHistory} from 'Components/userDevices';
 
-import {BasePanelViewModel, PanelViewModelProps} from './BasePanelViewModel';
+import {BasePanelViewModel, PanelViewModelParams} from './BasePanelViewModel';
 import {User} from '../../entity/User';
 import {ConversationRepository} from '../../conversation/ConversationRepository';
 import {ClientRepository} from '../../client/ClientRepository';
@@ -37,7 +37,7 @@ export class ParticipantDevicesViewModel extends BasePanelViewModel {
   showDeviceList: () => boolean;
   userEntity: ko.Observable<User>;
 
-  constructor(params: PanelViewModelProps) {
+  constructor(params: PanelViewModelParams) {
     super(params);
     const {client, conversation, cryptography} = params.repositories;
     this.clientRepository = client;

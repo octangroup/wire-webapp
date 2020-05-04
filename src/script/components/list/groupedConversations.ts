@@ -19,9 +19,9 @@
 
 import ko from 'knockout';
 
-import {ConversationRepository} from 'src/script/conversation/ConversationRepository';
-import {Conversation} from 'src/script/entity/Conversation';
-import {ConversationListViewModel} from 'src/script/view_model/list/ConversationListViewModel';
+import {ConversationRepository} from '../../conversation/ConversationRepository';
+import {Conversation} from '../../entity/Conversation';
+import {ConversationListViewModel} from '../../view_model/list/ConversationListViewModel';
 import {
   ConversationLabel,
   createLabel,
@@ -35,32 +35,25 @@ import './groupedConversationHeader';
 
 interface GroupedConversationsParams {
   conversationRepository: ConversationRepository;
-  listViewModel: ConversationListViewModel;
-  hasJoinableCall: (conversationId: string) => boolean;
-  onJoinCall: (conversationEntity: Conversation) => void;
-  isSelectedConversation: (conversationEntity: Conversation) => boolean;
   expandedFolders: ko.ObservableArray<string>;
+  hasJoinableCall: (conversationId: string) => boolean;
+  isSelectedConversation: (conversationEntity: Conversation) => boolean;
   isVisibleFunc: (top: number, bottom: number) => boolean;
+  listViewModel: ConversationListViewModel;
+  onJoinCall: (conversationEntity: Conversation) => void;
 }
 
-ko.components.register('grouped-conversations', {
-  template: `
-    <!-- ko foreach: {data: folders, as: 'folder', noChildContext: true} -->
-      <div class="conversation-folder" data-uie-name="conversation-folder" data-bind="attr: {'data-uie-value': folder.name}">
-      <grouped-conversation-header data-bind="click: () => toggle(folder.id)" params="conversationLabel: folder, isOpen: isExpanded(folder.id)"></grouped-conversation-header>
-        <div data-bind="visible: isExpanded(folder.id)">
-          <!-- ko foreach: {data: folder.conversations, as: 'conversation', noChildContext: true} -->
-            <conversation-list-cell
-              data-bind="link_to: getConversationUrl(conversation.id), event: {'contextmenu': (_, event) => listViewModel.onContextMenu(conversation, event)}"
-              data-uie-name="item-conversation"
-              params="click: (_, event) => listViewModel.onContextMenu(conversation, event), conversation: conversation, showJoinButton: hasJoinableCall(conversation.id), is_selected: isSelectedConversation, onJoinCall: onJoinCall,offsetTop: getOffsetTop(folder, conversation), index: $index, isVisibleFunc: isVisibleFunc">
-            </conversation-list-cell>
-          <!-- /ko -->
-        </div>
-      </div>
-    <!-- /ko -->
-  `,
-  viewModel: function ({
+class GroupedConversations {
+  readonly expandedFolders: ko.ObservableArray<string>;
+  readonly folders: ko.PureComputed<ConversationLabel[]>;
+  readonly getConversationUrl: (conversationId: string) => string;
+  readonly hasJoinableCall: (conversationId: string) => boolean;
+  readonly isSelectedConversation: (conversationEntity: Conversation) => boolean;
+  readonly isVisibleFunc: (top: number, bottom: number) => boolean;
+  readonly listViewModel: ConversationListViewModel;
+  readonly onJoinCall: (conversationEntity: Conversation) => void;
+
+  constructor({
     conversationRepository,
     listViewModel,
     hasJoinableCall,
@@ -68,7 +61,7 @@ ko.components.register('grouped-conversations', {
     isSelectedConversation,
     expandedFolders = ko.observableArray([]),
     isVisibleFunc = () => false,
-  }: GroupedConversationsParams): void {
+  }: GroupedConversationsParams) {
     const {conversationLabelRepository} = conversationRepository;
     this.listViewModel = listViewModel;
     this.hasJoinableCall = hasJoinableCall;
@@ -76,8 +69,7 @@ ko.components.register('grouped-conversations', {
     this.isSelectedConversation = isSelectedConversation;
     this.getConversationUrl = generateConversationUrl;
     this.isVisibleFunc = isVisibleFunc;
-    this.countUnread = (conversations: ko.Observable<Conversation[]>) =>
-      conversations().reduce((sum, conversation) => (conversation.hasUnread() ? sum + 1 : sum), 0);
+    this.expandedFolders = expandedFolders;
 
     this.folders = ko.pureComputed<ConversationLabel[]>(() => {
       const folders: ConversationLabel[] = [];
@@ -105,35 +97,64 @@ ko.components.register('grouped-conversations', {
 
       return folders;
     });
-    this.isExpanded = (folderId: string): boolean => expandedFolders().includes(folderId);
-    this.toggle = (folderId: string): void => {
-      if (this.isExpanded(folderId)) {
-        expandedFolders.remove(folderId);
-      } else {
-        expandedFolders.push(folderId);
-      }
-    };
+  }
 
-    /*
-     *  We need to calculate the offset from the top for the isVisibleFunc as we can't rely
-     *  on the index of the conversation alone. We need to account for the folder headers and
-     *  the height of the <conversation-list-cell>s of the previous open folders.
-     */
-    this.getOffsetTop = (folder: ConversationLabel, conversation: Conversation) => {
-      const folderHeaderHeight = 53;
-      const firstFolderHeaderHeight = 33;
-      const cellHeight = 56;
+  countUnread = (conversations: ko.Observable<Conversation[]>) => {
+    conversations().reduce((sum, conversation) => (conversation.hasUnread() ? sum + 1 : sum), 0);
+  };
 
-      const folders = this.folders() as ConversationLabel[];
-      const folderIndex = folders.indexOf(folder);
-      const totalHeaderHeight = folderHeaderHeight * folderIndex + firstFolderHeaderHeight;
-      const previousExpandedFolders = folders.slice(0, folderIndex).filter(({id}) => this.isExpanded(id));
-      const previousCellsHeight = previousExpandedFolders.reduce(
-        (height, {conversations}) => height + conversations.length * cellHeight,
-        0,
-      );
-      const currentCellsHeight = folder.conversations.indexOf(conversation) * cellHeight;
-      return totalHeaderHeight + previousCellsHeight + currentCellsHeight;
-    };
+  isExpanded = (folderId: string): boolean => this.expandedFolders().includes(folderId);
+
+  toggle = (folderId: string): void => {
+    if (this.isExpanded(folderId)) {
+      this.expandedFolders.remove(folderId);
+    } else {
+      this.expandedFolders.push(folderId);
+    }
+  };
+
+  /**
+   * We need to calculate the offset from the top for the isVisibleFunc as we can't rely
+   * on the index of the conversation alone. We need to account for the folder headers and
+   * the height of the <conversation-list-cell>s of the previous open folders.
+   */
+  getOffsetTop = (folder: ConversationLabel, conversation: Conversation) => {
+    const folderHeaderHeight = 53;
+    const firstFolderHeaderHeight = 33;
+    const cellHeight = 56;
+
+    const folders = this.folders() as ConversationLabel[];
+    const folderIndex = folders.indexOf(folder);
+    const totalHeaderHeight = folderHeaderHeight * folderIndex + firstFolderHeaderHeight;
+    const previousExpandedFolders = folders.slice(0, folderIndex).filter(({id}) => this.isExpanded(id));
+    const previousCellsHeight = previousExpandedFolders.reduce((accumulator, {conversations}) => {
+      return accumulator + conversations.length * cellHeight;
+    }, 0);
+    const currentCellsHeight = folder.conversations.indexOf(conversation) * cellHeight;
+    return totalHeaderHeight + previousCellsHeight + currentCellsHeight;
+  };
+}
+
+ko.components.register('grouped-conversations', {
+  template: `
+    <!-- ko foreach: {data: folders, as: 'folder', noChildContext: true} -->
+      <div class="conversation-folder" data-uie-name="conversation-folder" data-bind="attr: {'data-uie-value': folder.name}">
+      <grouped-conversation-header data-bind="click: () => toggle(folder.id)" params="conversationLabel: folder, isOpen: isExpanded(folder.id)"></grouped-conversation-header>
+        <div data-bind="visible: isExpanded(folder.id)">
+          <!-- ko foreach: {data: folder.conversations, as: 'conversation', noChildContext: true} -->
+            <conversation-list-cell
+              data-bind="link_to: getConversationUrl(conversation.id), event: {'contextmenu': (_, event) => listViewModel.onContextMenu(conversation, event)}"
+              data-uie-name="item-conversation"
+              params="click: (_, event) => listViewModel.onContextMenu(conversation, event), conversation: conversation, showJoinButton: hasJoinableCall(conversation.id), is_selected: isSelectedConversation, onJoinCall: onJoinCall,offsetTop: getOffsetTop(folder, conversation), index: $index, isVisibleFunc: isVisibleFunc">
+            </conversation-list-cell>
+          <!-- /ko -->
+        </div>
+      </div>
+    <!-- /ko -->
+  `,
+  viewModel: {
+    createViewModel(params: GroupedConversationsParams) {
+      return new GroupedConversations(params);
+    },
   },
 });

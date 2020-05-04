@@ -57,28 +57,28 @@ interface ParticipantAvatarParams {
 }
 
 export class ParticipantAvatar {
-  logger: Logger;
-  participant: ko.Observable<User>;
-  isService: ko.PureComputed<boolean>;
-  isUser: ko.PureComputed<boolean>;
-  isTemporaryGuest: ko.PureComputed<boolean>;
-  remainingTimer: any;
-  avatarType: ko.PureComputed<string>;
-  delay: number;
-  size: SIZE;
-  element: JQuery<HTMLElement>;
-  borderWidth: number;
-  borderRadius: number;
-  timerLength: number;
-  timerOffset: ko.PureComputed<number>;
-  avatarLoadingBlocked: boolean;
   avatarEnteredViewport: boolean;
-  initials: ko.PureComputed<string>;
-  state: ko.PureComputed<STATE>;
-  cssClasses: ko.PureComputed<string>;
-  onClick: (data: any, event: Event) => void;
-  pictureSubscription: ko.Subscription;
-  participantSubscription: ko.Subscription;
+  avatarLoadingBlocked: boolean;
+  readonly avatarType: ko.PureComputed<string>;
+  readonly borderRadius: number;
+  readonly borderWidth: number;
+  readonly cssClasses: ko.PureComputed<string>;
+  readonly delay: number;
+  readonly element: JQuery<Node>;
+  readonly initials: ko.PureComputed<string>;
+  readonly isService: ko.PureComputed<boolean>;
+  readonly isTemporaryGuest: ko.PureComputed<boolean>;
+  readonly isUser: ko.PureComputed<boolean>;
+  readonly logger: Logger;
+  readonly onClick: (data: any, event: Event) => void;
+  readonly participant: ko.Observable<User>;
+  readonly participantSubscription: ko.Subscription;
+  readonly pictureSubscription: ko.Subscription;
+  readonly remainingTimer: any;
+  readonly size: SIZE;
+  readonly state: ko.PureComputed<STATE>;
+  readonly timerLength: number;
+  readonly timerOffset: ko.PureComputed<number>;
 
   static get SIZE(): typeof SIZE {
     return SIZE;
@@ -96,7 +96,7 @@ export class ParticipantAvatar {
     };
   }
 
-  constructor(params: ParticipantAvatarParams, componentInfo: {element: HTMLElement}) {
+  constructor(params: ParticipantAvatarParams, componentInfo: ko.components.ComponentInfo) {
     this.logger = getLogger('ParticipantAvatar');
 
     const isParticipantObservable = typeof params.participant === 'function';
@@ -242,7 +242,7 @@ export class ParticipantAvatar {
       }
     };
 
-    viewportObserver.onElementInViewport(componentInfo.element, _onInViewport);
+    viewportObserver.onElementInViewport(componentInfo.element as HTMLElement, _onInViewport);
 
     this.pictureSubscription = this.participant().mediumPictureResource.subscribe(_loadAvatarPictureIfVisible);
     this.participantSubscription = this.participant.subscribe(_loadAvatarPictureIfVisible);
@@ -282,7 +282,7 @@ ko.components.register('participant-avatar', {
     </div>
     `,
   viewModel: {
-    createViewModel(params: ParticipantAvatarParams, componentInfo: {element: HTMLElement}) {
+    createViewModel(params: ParticipantAvatarParams, componentInfo: ko.components.ComponentInfo) {
       return new ParticipantAvatar(params, componentInfo);
     },
   },

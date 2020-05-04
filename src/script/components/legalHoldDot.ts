@@ -21,11 +21,44 @@ import ko from 'knockout';
 import {Conversation} from '../entity/Conversation';
 import {LegalHoldModalViewModel} from '../view_model/content/LegalHoldModalViewModel';
 
-interface LegalHoldParams {
+interface LegalHoldDotParams {
   isPending?: ko.Observable<boolean>;
   large?: boolean;
   conversation?: Conversation;
   legalHoldModal?: LegalHoldModalViewModel;
+}
+
+class LegalHoldDot {
+  readonly conversation: Conversation;
+  readonly isInteractive: boolean;
+  readonly isPending: ko.Observable<boolean>;
+  readonly large: boolean;
+  readonly legalHoldModal: LegalHoldModalViewModel;
+
+  constructor({isPending = ko.observable(false), large = false, conversation, legalHoldModal}: LegalHoldDotParams) {
+    this.large = large;
+    this.isPending = isPending;
+    this.isInteractive = !!legalHoldModal;
+    this.conversation = conversation;
+    this.legalHoldModal = legalHoldModal;
+    this.conversation = conversation;
+  }
+
+  onClick = (_: unknown, event: MouseEvent): void => {
+    event.stopPropagation();
+
+    if (this.isInteractive) {
+      if (this.isPending()) {
+        this.legalHoldModal.showRequestModal(true);
+        return;
+      }
+      if (this.conversation) {
+        this.legalHoldModal.showUsers(this.conversation);
+        return;
+      }
+      this.legalHoldModal.showUsers();
+    }
+  };
 }
 
 ko.components.register('legal-hold-dot', {
@@ -37,29 +70,9 @@ ko.components.register('legal-hold-dot', {
       <!-- /ko -->
     </div>
     `,
-  viewModel: function ({
-    isPending = ko.observable(false),
-    large = false,
-    conversation,
-    legalHoldModal,
-  }: LegalHoldParams = {}): void {
-    this.large = large;
-    this.isPending = isPending;
-    this.isInteractive = !!legalHoldModal;
-
-    this.onClick = (data: any, event: MouseEvent): void => {
-      event.stopPropagation();
-      if (this.isInteractive) {
-        if (isPending()) {
-          legalHoldModal.showRequestModal(true);
-          return;
-        }
-        if (conversation) {
-          legalHoldModal.showUsers(conversation);
-          return;
-        }
-        legalHoldModal.showUsers();
-      }
-    };
+  viewModel: {
+    createViewModel(params: LegalHoldDotParams) {
+      return new LegalHoldDot(params);
+    },
   },
 });

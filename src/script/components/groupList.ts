@@ -27,9 +27,9 @@ interface GroupListViewModelParams {
 }
 
 class GroupListViewModel {
-  groups: ko.ObservableArray<Conversation[]>;
-  onSelect: (group: Conversation) => void;
-  ParticipantAvatar: typeof ParticipantAvatar;
+  readonly groups: ko.ObservableArray<Conversation[]>;
+  readonly onSelect: (group: Conversation) => void;
+  readonly ParticipantAvatar: typeof ParticipantAvatar;
 
   constructor(params: GroupListViewModelParams) {
     this.groups = params.groups;
@@ -55,5 +55,9 @@ ko.components.register('group-list', {
       </div>
     </div>
   `,
-  viewModel: GroupListViewModel,
+  viewModel: {
+    createViewModel(params: GroupListViewModelParams) {
+      return new GroupListViewModel(params);
+    },
+  },
 });

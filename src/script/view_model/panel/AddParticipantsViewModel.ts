@@ -25,7 +25,7 @@ import {t} from 'Util/LocalizerUtil';
 import {safeWindowOpen} from 'Util/SanitizationUtil';
 import {sortUsersByPriority} from 'Util/StringUtil';
 
-import {BasePanelViewModel, PanelViewModelProps} from './BasePanelViewModel';
+import {BasePanelViewModel, PanelViewModelParams} from './BasePanelViewModel';
 import {getManageServicesUrl} from '../../externalRoute';
 import * as trackingHelpers from '../../tracking/Helpers';
 import {EventName} from '../../tracking/EventName';
@@ -73,7 +73,7 @@ export class AddParticipantsViewModel extends BasePanelViewModel {
     };
   }
 
-  constructor(params: PanelViewModelProps) {
+  constructor(params: PanelViewModelParams) {
     super(params);
 
     const {conversation, integration, search, team, user} = params.repositories;

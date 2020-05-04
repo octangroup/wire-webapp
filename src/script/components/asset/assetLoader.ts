@@ -19,10 +19,26 @@
 
 import ko from 'knockout';
 
-interface Params {
+interface AssetLoaderParams {
   large: boolean;
   loadProgress: ko.Subscribable<number>;
   onCancel: () => void;
+}
+
+class AssetLoader {
+  progress: ko.PureComputed<string>;
+  viewBox: string;
+  onCancel: () => void;
+
+  constructor({large, loadProgress, onCancel}: AssetLoaderParams) {
+    this.onCancel = onCancel;
+    const elementScale = large ? 2 : 1;
+
+    this.progress = ko.pureComputed(() => `${loadProgress() * elementScale} ${100 * elementScale}`);
+
+    const viewBoxSize = 32 * elementScale;
+    this.viewBox = `0 0 ${viewBoxSize} ${viewBoxSize}`;
+  }
 }
 
 ko.components.register('asset-loader', {
@@ -34,13 +50,9 @@ ko.components.register('asset-loader', {
     <close-icon class="media-button__icon"></close-icon>
   </div>
   `,
-  viewModel: function ({large, loadProgress, onCancel}: Params): void {
-    const elementScale = large ? 2 : 1;
-
-    this.progress = ko.pureComputed(() => `${loadProgress() * elementScale} ${100 * elementScale}`);
-
-    const viewBoxSize = 32 * elementScale;
-    this.viewBox = `0 0 ${viewBoxSize} ${viewBoxSize}`;
-    this.onCancel = onCancel;
+  viewModel: {
+    createViewModel(params: AssetLoaderParams) {
+      return new AssetLoader(params);
+    },
   },
 });

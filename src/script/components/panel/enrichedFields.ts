@@ -28,7 +28,7 @@ import {User} from '../../entity/User';
 import {APIClientSingleton} from '../../service/APIClientSingleton';
 import {RichProfileRepository} from '../../user/RichProfileRepository';
 
-interface ComponentParams {
+interface EnrichedFieldsParams {
   user: ko.Observable<User>;
   onFieldsLoaded: (richFields: RichInfoField[]) => void;
   richProfileRepository: RichProfileRepository;
@@ -38,7 +38,7 @@ class EnrichedFields {
   readonly fields: ko.Observable<RichInfoField[]>;
   readonly richProfileRepository: RichProfileRepository;
 
-  constructor(params: ComponentParams, element: HTMLElement) {
+  constructor(params: EnrichedFieldsParams, componentInfo: ko.components.ComponentInfo) {
     const {
       user,
       onFieldsLoaded = noop,
@@ -67,7 +67,7 @@ class EnrichedFields {
         }
       },
       this,
-      {disposeWhenNodeIsRemoved: element},
+      {disposeWhenNodeIsRemoved: componentInfo.element},
     );
   }
 }
@@ -86,8 +86,8 @@ ko.components.register('enriched-fields', {
     <!-- /ko -->
   `,
   viewModel: {
-    createViewModel: (params: ComponentParams, componentInfo: {element: HTMLElement}) => {
-      return new EnrichedFields(params, componentInfo.element);
+    createViewModel(params: EnrichedFieldsParams, componentInfo: ko.components.ComponentInfo) {
+      return new EnrichedFields(params, componentInfo);
     },
   },
 });

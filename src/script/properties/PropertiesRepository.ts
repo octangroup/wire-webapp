@@ -17,12 +17,13 @@
  *
  */
 
+import {AudioPreference, NotificationPreference, WebappProperties} from '@wireapp/api-client/dist/user/data';
+import {amplify} from 'amplify';
+
 import {Environment} from 'Util/Environment';
 import {t} from 'Util/LocalizerUtil';
 import {Logger, getLogger} from 'Util/Logger';
 
-import {AudioPreference, NotificationPreference, WebappProperties} from '@wireapp/api-client/dist/user/data';
-import {amplify} from 'amplify';
 import {Config} from '../Config';
 import {ReceiptMode} from '../conversation/ReceiptMode';
 import {User} from '../entity/User';
@@ -53,7 +54,7 @@ export class PropertiesRepository {
 
   private readonly logger: Logger;
   private readonly propertiesService: PropertiesService;
-  private readonly receiptMode: ko.Observable<any>;
+  private readonly receiptMode: ko.Observable<ReceiptMode>;
   private readonly selfService: SelfService;
   private readonly selfUser: ko.Observable<User>;
   public properties: WebappProperties;
@@ -92,7 +93,6 @@ export class PropertiesRepository {
     };
     this.selfUser = ko.observable();
     this.receiptMode = ko.observable(PropertiesRepository.CONFIG.WIRE_RECEIPT_MODE.defaultValue);
-    /** @type {ko.Observable<ConsentValue | boolean>} */
     this.marketingConsent = ko.observable(PropertiesRepository.CONFIG.WIRE_MARKETING_CONSENT.defaultValue);
   }
 

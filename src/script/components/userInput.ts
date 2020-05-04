@@ -30,11 +30,11 @@ interface UserInputParams {
 }
 
 class UserInput {
-  element: HTMLElement;
+  element: Node;
   hasFocus: ko.Observable<boolean>;
-  innerElement: JQuery<HTMLElement>;
+  innerElement: JQuery<Node>;
   input: ko.Observable<string>;
-  inputElement: JQuery<HTMLElement>;
+  inputElement: JQuery<Node>;
   noSelectedUsers: ko.PureComputed<boolean>;
   onEnter: () => void | Promise<void>;
   placeholder: ko.PureComputed<string>;
@@ -42,7 +42,7 @@ class UserInput {
   selectedSubscription: ko.Subscription;
   selectedUsers: ko.ObservableArray<User>;
 
-  constructor(params: UserInputParams, componentInfo: {element: HTMLElement}) {
+  constructor(params: UserInputParams, componentInfo: ko.components.ComponentInfo) {
     this.input = params.input;
     this.onEnter = params.enter;
     this.placeholderText = params.placeholder;
@@ -70,7 +70,7 @@ class UserInput {
         }
 
         this.inputElement.focus();
-        window.setTimeout(() => this.innerElement.scrollTop(this.innerElement[0].scrollHeight));
+        window.setTimeout(() => this.innerElement.scrollTop((this.innerElement[0] as HTMLElement).scrollHeight));
       });
     }
 
@@ -83,7 +83,7 @@ class UserInput {
     });
   }
 
-  onKeyDown(data: any, keyboardEvent: KeyboardEvent): true {
+  onKeyDown(_: unknown, keyboardEvent: KeyboardEvent): true {
     if (typeof this.selectedUsers === 'function') {
       if (isRemovalAction(keyboardEvent) && !this.input().length) {
         this.selectedUsers.pop();
@@ -124,7 +124,7 @@ ko.components.register('user-input', {
     </form>
   `,
   viewModel: {
-    createViewModel(params: UserInputParams, componentInfo: {element: HTMLElement}) {
+    createViewModel(params: UserInputParams, componentInfo: ko.components.ComponentInfo) {
       return new UserInput(params, componentInfo);
     },
   },

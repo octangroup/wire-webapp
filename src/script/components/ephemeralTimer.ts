@@ -24,8 +24,8 @@ interface EphemeralTimerParams {
 }
 
 class EphemeralTimer {
-  started: number;
-  duration: number;
+  readonly started: number;
+  readonly duration: number;
 
   constructor({message: messageEntity}: EphemeralTimerParams) {
     this.started = messageEntity.ephemeral_started();
@@ -47,5 +47,9 @@ ko.components.register('ephemeral-timer', {
       </circle>
     </svg>
   `,
-  viewModel: EphemeralTimer,
+  viewModel: {
+    createViewModel(params: EphemeralTimerParams) {
+      return new EphemeralTimer(params);
+    },
+  },
 });

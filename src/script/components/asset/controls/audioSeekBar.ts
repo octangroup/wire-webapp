@@ -22,41 +22,40 @@ import {debounce} from 'underscore';
 
 import {interpolate} from 'Util/ArrayUtil';
 import {clamp} from 'Util/NumberUtil';
+import {File} from '../../../entity/message/File';
 
-interface Params {
+interface AudioSeekBarComponentParams {
+  asset: File;
   disabled: ko.Subscribable<boolean>;
   src: HTMLAudioElement;
-
-  // TODO: replace with proper Type once they are defined
-  asset: any;
 }
 
 class AudioSeekBarComponent {
-  audioElement: HTMLAudioElement;
-  element: HTMLElement;
-  loudness: number[];
+  readonly _onResizeFired: () => void;
+  readonly audioElement: HTMLAudioElement;
+  readonly element: Node;
+  readonly loudness: number[];
   levels: HTMLSpanElement[];
-  _onResizeFired: () => void;
 
-  constructor(params: Params, element: HTMLElement) {
+  constructor(params: AudioSeekBarComponentParams, componentInfo: ko.components.ComponentInfo) {
     this.audioElement = params.src;
 
-    this.element = element;
+    this.element = componentInfo.element;
     this.loudness = [];
     this.levels = [];
 
     ko.computed(
       () => {
         if (typeof params.disabled === 'function') {
-          this.element.classList.toggle('element-disabled', params.disabled());
+          (this.element as HTMLElement).classList.toggle('element-disabled', params.disabled());
         }
       },
-      {disposeWhenNodeIsRemoved: element},
+      {disposeWhenNodeIsRemoved: componentInfo.element},
     );
 
     const assetMeta = params.asset.meta;
     if (assetMeta?.loudness !== null) {
-      this.loudness = this._normalizeLoudness(assetMeta.loudness, this.element.clientHeight);
+      this.loudness = this._normalizeLoudness(assetMeta.loudness, (this.element as HTMLElement).clientHeight);
     }
 
     this._onResizeFired = debounce(() => {
@@ -73,9 +72,9 @@ class AudioSeekBarComponent {
   }
 
   _renderLevels(): void {
-    const numberOfLevelsFitOnScreen = Math.floor(this.element.clientWidth / 3); // 2px + 1px
+    const numberOfLevelsFitOnScreen = Math.floor((this.element as HTMLElement).clientWidth / 3); // 2px + 1px
     const scaledLoudness = interpolate(this.loudness, numberOfLevelsFitOnScreen);
-    this.element.innerHTML = '';
+    (this.element as HTMLElement).innerHTML = '';
 
     this.levels = scaledLoudness.map(loudness => {
       const level = document.createElement('span');
@@ -118,8 +117,8 @@ class AudioSeekBarComponent {
 ko.components.register('audio-seek-bar', {
   template: '<!-- content is generated -->',
   viewModel: {
-    createViewModel(params: Params, {element}: ko.components.ComponentInfo): AudioSeekBarComponent {
-      return new AudioSeekBarComponent(params, element as HTMLElement);
+    createViewModel(params: AudioSeekBarComponentParams, componentInfo: ko.components.ComponentInfo) {
+      return new AudioSeekBarComponent(params, componentInfo);
     },
   },
 });

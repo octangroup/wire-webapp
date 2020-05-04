@@ -22,11 +22,34 @@ import ko from 'knockout';
 import {noop} from 'Util/util';
 import {CompositeMessage} from '../../entity/message/CompositeMessage';
 
-interface MessageButtonProps {
-  label: string;
+interface MessageButtonParams {
   id: string;
-  onClick?: () => void;
+  label: string;
   message: CompositeMessage;
+  onClick?: () => void;
+}
+
+class MessageButton {
+  readonly errorMessage: ko.PureComputed<string>;
+  readonly id: string;
+  readonly isSelected: ko.PureComputed<boolean>;
+  readonly isWaiting: ko.PureComputed<boolean>;
+  readonly label: string;
+  readonly onClick: () => void;
+
+  constructor({
+    label,
+    id,
+    onClick = noop,
+    message: {selectedButtonId, waitingButtonId, errorButtonId, errorMessage},
+  }: MessageButtonParams) {
+    this.id = id;
+    this.label = label;
+    this.onClick = onClick;
+    this.isSelected = ko.pureComputed(() => selectedButtonId() === id);
+    this.isWaiting = ko.pureComputed(() => waitingButtonId() === id);
+    this.errorMessage = ko.pureComputed(() => (errorButtonId() === id ? errorMessage() : ''));
+  }
 }
 
 ko.components.register('message-button', {
@@ -42,17 +65,9 @@ ko.components.register('message-button', {
         <div class="message-button__error" data-bind="text: errorMessage" data-uie-name="message-button-error"></div>
       <!-- /ko -->
     </div>`,
-  viewModel: function ({
-    label,
-    id,
-    onClick = noop,
-    message: {selectedButtonId, waitingButtonId, errorButtonId, errorMessage},
-  }: MessageButtonProps) {
-    this.id = id;
-    this.label = label;
-    this.onClick = onClick;
-    this.isSelected = ko.pureComputed(() => selectedButtonId() === id);
-    this.isWaiting = ko.pureComputed(() => waitingButtonId() === id);
-    this.errorMessage = ko.pureComputed(() => (errorButtonId() === id ? errorMessage() : ''));
+  viewModel: {
+    createViewModel(params: MessageButtonParams) {
+      return new MessageButton(params);
+    },
   },
 });

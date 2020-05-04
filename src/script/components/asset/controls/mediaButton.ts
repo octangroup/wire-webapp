@@ -27,27 +27,27 @@ import {AbstractAssetTransferStateTracker} from '../AbstractAssetTransferStateTr
 
 import '../assetLoader';
 
-interface Params {
-  src: HTMLMediaElement;
-  large: boolean;
+interface MediaButtonComponentParams {
   asset: FileAsset;
-  uploadProgress: ko.PureComputed<number>;
-  transferState: ko.PureComputed<AssetTransferState>;
-  play?: () => void;
-  pause?: () => void;
   cancel?: () => void;
+  large: boolean;
+  pause?: () => void;
+  play?: () => void;
+  src: HTMLMediaElement;
+  transferState: ko.PureComputed<AssetTransferState>;
+  uploadProgress: ko.PureComputed<number>;
 }
 
 class MediaButtonComponent extends AbstractAssetTransferStateTracker {
-  mediaElement: HTMLMediaElement;
-  large: boolean;
-  asset: FileAsset;
-  isPlaying: ko.Observable<boolean>;
-  onClickPlay: () => void;
-  onClickPause: () => void;
-  onClickCancel: () => void;
+  readonly asset: FileAsset;
+  readonly isPlaying: ko.Observable<boolean>;
+  readonly large: boolean;
+  readonly mediaElement: HTMLMediaElement;
+  readonly onClickCancel: () => void;
+  readonly onClickPause: () => void;
+  readonly onClickPlay: () => void;
 
-  constructor(params: Params, element: HTMLElement) {
+  constructor(params: MediaButtonComponentParams, componentInfo: ko.components.ComponentInfo) {
     super();
     this.mediaElement = params.src;
     this.large = params.large;
@@ -56,7 +56,7 @@ class MediaButtonComponent extends AbstractAssetTransferStateTracker {
     this.transferState = params.transferState;
 
     if (this.large) {
-      element.classList.add('media-button-lg');
+      (componentInfo.element as HTMLElement).classList.add('media-button-lg');
     }
 
     this.isPlaying = ko.observable(false);
@@ -97,8 +97,8 @@ ko.components.register('media-button', {
     <!-- /ko -->
 `,
   viewModel: {
-    createViewModel(params: Params, {element}: ko.components.ComponentInfo): MediaButtonComponent {
-      return new MediaButtonComponent(params, element as HTMLElement);
+    createViewModel(params: MediaButtonComponentParams, componentInfo: ko.components.ComponentInfo) {
+      return new MediaButtonComponent(params, componentInfo);
     },
   },
 });

@@ -25,7 +25,7 @@ import {t} from 'Util/LocalizerUtil';
 import {formatDuration} from 'Util/TimeUtil';
 import {removeLineBreaks, sortUsersByPriority} from 'Util/StringUtil';
 
-import {BasePanelViewModel, PanelViewModelProps} from './BasePanelViewModel';
+import {BasePanelViewModel, PanelViewModelParams} from './BasePanelViewModel';
 import {getNotificationText} from '../../conversation/NotificationSetting';
 import {ConversationVerificationState} from '../../conversation/ConversationVerificationState';
 import {WebAppEvents} from '../../event/WebApp';
@@ -93,7 +93,7 @@ export class ConversationDetailsViewModel extends BasePanelViewModel {
     };
   }
 
-  constructor(params: PanelViewModelProps) {
+  constructor(params: PanelViewModelParams) {
     super(params);
     this.clickOnShowService = this.clickOnShowService.bind(this);
     this.clickOnShowUser = this.clickOnShowUser.bind(this);

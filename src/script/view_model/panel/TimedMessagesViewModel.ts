@@ -21,7 +21,7 @@ import ko from 'knockout';
 
 import {formatDuration} from 'Util/TimeUtil';
 
-import {BasePanelViewModel, PanelViewModelProps} from './BasePanelViewModel';
+import {BasePanelViewModel, PanelViewModelParams} from './BasePanelViewModel';
 import {EphemeralTimings} from '../../ephemeral/EphemeralTimings';
 import {ConversationRepository} from '../../conversation/ConversationRepository';
 
@@ -36,7 +36,7 @@ export class TimedMessagesViewModel extends BasePanelViewModel {
   currentMessageTimer: ko.Observable<number>;
   messageTimes: ko.PureComputed<messageTime[]>;
 
-  constructor(params: PanelViewModelProps) {
+  constructor(params: PanelViewModelParams) {
     super(params);
 
     this.timedMessageChange = this.timedMessageChange.bind(this);

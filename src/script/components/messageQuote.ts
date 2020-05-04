@@ -43,21 +43,21 @@ interface MessageQuoteParams {
 }
 
 class MessageQuote {
-  canShowMore: ko.Observable<boolean>;
-  dispose: () => void;
-  error: ko.Observable<any>;
-  focusMessage: () => void;
-  formatDateNumeral: (date: string | number | Date) => string;
-  formatTimeShort: (date: string | number | Date) => string;
-  handleClickOnMessage: (message: ContentMessage, event: Event) => boolean;
-  includesOnlyEmojis: (text: string) => boolean;
-  quotedMessage: ko.Observable<ContentMessage>;
-  quotedMessageId: ko.Observable<any>;
-  quotedMessageIsBeforeToday: ko.PureComputed<boolean>;
-  selfId: ko.Observable<string>;
-  showDetail: (message: ContentMessage, event: UIEvent) => void;
-  showFullText: ko.Observable<boolean>;
-  showUserDetails: (user: User) => void;
+  readonly canShowMore: ko.Observable<boolean>;
+  readonly error: ko.Observable<any>;
+  readonly focusMessage: () => void;
+  readonly formatDateNumeral: (date: string | number | Date) => string;
+  readonly formatTimeShort: (date: string | number | Date) => string;
+  readonly handleClickOnMessage: (message: ContentMessage, event: Event) => boolean;
+  readonly includesOnlyEmojis: (text: string) => boolean;
+  readonly quotedMessage: ko.Observable<ContentMessage>;
+  readonly quotedMessageId: ko.Observable<any>;
+  readonly quotedMessageIsBeforeToday: ko.PureComputed<boolean>;
+  readonly quotedMessageSubscription: ko.Subscription;
+  readonly selfId: ko.Observable<string>;
+  readonly showDetail: (message: ContentMessage, event: UIEvent) => void;
+  readonly showFullText: ko.Observable<boolean>;
+  readonly showUserDetails: (user: User) => void;
 
   constructor({
     conversation,
@@ -92,7 +92,7 @@ class MessageQuote {
 
     this.includesOnlyEmojis = includesOnlyEmojis;
 
-    const quotedMessageSubscription = this.quotedMessage.subscribe(() => this.showFullText(false));
+    this.quotedMessageSubscription = this.quotedMessage.subscribe(() => this.showFullText(false));
 
     this.quotedMessageIsBeforeToday = ko.pureComputed(() => {
       if (!this.quotedMessage()) {
@@ -116,29 +116,29 @@ class MessageQuote {
         });
     }
 
-    const handleQuoteDeleted = (messageId: string) => {
-      if (this.quotedMessageId() === messageId) {
-        this.error(QuoteEntity.ERROR.MESSAGE_NOT_FOUND);
-        this.quotedMessage(undefined);
-      }
-    };
-
-    const handleQuoteUpdated = (originalMessageId: string, messageEntity: ContentMessage) => {
-      if (this.quotedMessageId() === originalMessageId) {
-        this.quotedMessage(messageEntity);
-        this.quotedMessageId(messageEntity.id);
-      }
-    };
-
-    amplify.subscribe(WebAppEvents.CONVERSATION.MESSAGE.REMOVED, handleQuoteDeleted);
-    amplify.subscribe(WebAppEvents.CONVERSATION.MESSAGE.UPDATED, handleQuoteUpdated);
-
-    this.dispose = () => {
-      quotedMessageSubscription.dispose();
-      amplify.unsubscribe(WebAppEvents.CONVERSATION.MESSAGE.REMOVED, handleQuoteDeleted);
-      amplify.unsubscribe(WebAppEvents.CONVERSATION.MESSAGE.UPDATED, handleQuoteUpdated);
-    };
+    amplify.subscribe(WebAppEvents.CONVERSATION.MESSAGE.REMOVED, this.handleQuoteDeleted);
+    amplify.subscribe(WebAppEvents.CONVERSATION.MESSAGE.UPDATED, this.handleQuoteUpdated);
   }
+
+  handleQuoteDeleted = (messageId: string) => {
+    if (this.quotedMessageId() === messageId) {
+      this.error(QuoteEntity.ERROR.MESSAGE_NOT_FOUND);
+      this.quotedMessage(undefined);
+    }
+  };
+
+  handleQuoteUpdated = (originalMessageId: string, messageEntity: ContentMessage) => {
+    if (this.quotedMessageId() === originalMessageId) {
+      this.quotedMessage(messageEntity);
+      this.quotedMessageId(messageEntity.id);
+    }
+  };
+
+  dispose = () => {
+    this.quotedMessageSubscription.dispose();
+    amplify.unsubscribe(WebAppEvents.CONVERSATION.MESSAGE.REMOVED, this.handleQuoteDeleted);
+    amplify.unsubscribe(WebAppEvents.CONVERSATION.MESSAGE.UPDATED, this.handleQuoteUpdated);
+  };
 
   updateCanShowMore = (elements: Element[]) => {
     const textQuote = elements.find(element => element.classList && element.classList.contains('message-quote__text'));
@@ -219,5 +219,9 @@ ko.components.register('message-quote', {
     </div>
   <!-- /ko -->
   `,
-  viewModel: MessageQuote,
+  viewModel: {
+    createViewModel(params: MessageQuoteParams) {
+      return new MessageQuote(params);
+    },
+  },
 });

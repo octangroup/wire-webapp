@@ -25,7 +25,7 @@ import {Actions} from 'Components/panel/userActions';
 import 'Components/panel/enrichedFields';
 import 'Components/panel/userDetails';
 import {DefaultRole, ConversationRoleRepository} from '../../conversation/ConversationRoleRepository';
-import {BasePanelViewModel, PanelViewModelProps} from './BasePanelViewModel';
+import {BasePanelViewModel, PanelViewModelParams} from './BasePanelViewModel';
 import {UserRepository} from '../../user/UserRepository';
 import {ActionsViewModel} from '../ActionsViewModel';
 import {TeamRepository} from '../../team/TeamRepository';
@@ -44,7 +44,7 @@ export class GroupParticipantUserViewModel extends BasePanelViewModel {
   isSelfVerified: ko.PureComputed<boolean>;
   canChangeRole: ko.PureComputed<boolean>;
   isAdmin: ko.PureComputed<boolean>;
-  constructor(params: PanelViewModelProps) {
+  constructor(params: PanelViewModelParams) {
     super(params);
 
     const {mainViewModel, repositories} = params;

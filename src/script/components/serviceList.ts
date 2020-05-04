@@ -79,5 +79,9 @@ ko.components.register('service-list', {
       <div class="no-results" data-bind="text: t('searchListNoMatches')"></div>
     <!-- /ko -->
   `,
-  viewModel: ServiceList,
+  viewModel: {
+    createViewModel(params: ServiceListParams) {
+      return new ServiceList(params);
+    },
+  },
 });

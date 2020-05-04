@@ -27,33 +27,33 @@ import {ContentMessage} from '../../entity/message/ContentMessage';
 import {File as FileAsset} from '../../entity/message/File';
 import {AbstractAssetTransferStateTracker} from './AbstractAssetTransferStateTracker';
 
-interface Params {
-  message: ContentMessage;
+interface VideoAssetComponentParams {
   isQuote: boolean;
+  message: ContentMessage;
 }
 
 class VideoAssetComponent extends AbstractAssetTransferStateTracker {
-  logger: Logger;
-  message: ContentMessage;
-  asset: FileAsset;
-  videoElement: HTMLVideoElement;
-  videoSrc: ko.Observable<string>;
-  videoTime: ko.Observable<number>;
-  videoPlaybackError: ko.Observable<boolean>;
-  showBottomControls: ko.Observable<boolean>;
-  videoTimeRest: ko.PureComputed<number>;
-  preview: ko.Observable<string>;
-  displaySmall: ko.Observable<boolean>;
-  formatSeconds: (duration: number) => string;
+  readonly asset: FileAsset;
+  readonly displaySmall: ko.Observable<boolean>;
+  readonly formatSeconds: (duration: number) => string;
+  readonly logger: Logger;
+  readonly message: ContentMessage;
+  readonly preview: ko.Observable<string>;
+  readonly showBottomControls: ko.Observable<boolean>;
+  readonly videoElement: HTMLVideoElement;
+  readonly videoPlaybackError: ko.Observable<boolean>;
+  readonly videoSrc: ko.Observable<string>;
+  readonly videoTime: ko.Observable<number>;
+  readonly videoTimeRest: ko.PureComputed<number>;
 
-  constructor({message, isQuote}: Params, element: HTMLElement) {
+  constructor({message, isQuote}: VideoAssetComponentParams, componentInfo: ko.components.ComponentInfo) {
     super(ko.unwrap(message));
     this.logger = getLogger('VideoAssetComponent');
 
     this.message = ko.unwrap(message);
     this.asset = this.message.get_first_asset() as FileAsset;
 
-    this.videoElement = element.querySelector('video');
+    this.videoElement = (componentInfo.element as HTMLElement).querySelector('video');
     this.videoSrc = ko.observable();
     this.videoTime = ko.observable();
 
@@ -70,7 +70,7 @@ class VideoAssetComponent extends AbstractAssetTransferStateTracker {
           this.asset.load_preview().then(blob => this.preview(window.URL.createObjectURL(blob)));
         }
       },
-      {disposeWhenNodeIsRemoved: element},
+      {disposeWhenNodeIsRemoved: componentInfo.element},
     );
 
     this.onPlayButtonClicked = this.onPlayButtonClicked.bind(this);
@@ -192,8 +192,8 @@ ko.components.register('video-asset', {
     <!-- /ko -->
   `,
   viewModel: {
-    createViewModel(params: Params, {element}: ko.components.ComponentInfo): VideoAssetComponent {
-      return new VideoAssetComponent(params, element as HTMLElement);
+    createViewModel(params: VideoAssetComponentParams, componentInfo: ko.components.ComponentInfo) {
+      return new VideoAssetComponent(params, componentInfo);
     },
   },
 });

@@ -18,20 +18,44 @@
  */
 
 import ko from 'knockout';
+import {amplify} from 'amplify';
 
 import {ParticipantAvatar} from 'Components/participantAvatar';
 import {User} from '../../entity/User';
 
 import 'Components/availabilityState';
 import {WebAppEvents} from '../../event/WebApp';
-import {amplify} from 'amplify';
 
-interface UserDetailsProps {
+interface UserDetailsParams {
   participant: ko.Observable<User>;
   isVerified?: ko.PureComputed<boolean>;
   badge?: string;
   isGroupAdmin: boolean;
   isSelfVerified: ko.Subscribable<boolean>;
+}
+
+class UserDetails {
+  participant: ko.Observable<User>;
+  isVerified: ko.PureComputed<boolean>;
+  badge: string;
+  isGroupAdmin: boolean;
+  isSelfVerified: ko.Subscribable<boolean>;
+
+  constructor({
+    participant,
+    isVerified = participant().is_verified,
+    badge,
+    isGroupAdmin,
+    isSelfVerified = ko.observable(false),
+  }: UserDetailsParams) {
+    this.participant = participant;
+    this.isVerified = isVerified;
+    this.badge = badge;
+    this.isGroupAdmin = isGroupAdmin;
+    this.isSelfVerified = isSelfVerified;
+
+    amplify.publish(WebAppEvents.USER.UPDATE, this.participant().id);
+  }
 }
 
 ko.components.register('panel-user-details', {
@@ -85,19 +109,9 @@ ko.components.register('panel-user-details', {
       <!-- /ko -->
     </div>
   `,
-  viewModel: function ({
-    participant,
-    isVerified = participant().is_verified,
-    badge,
-    isGroupAdmin,
-    isSelfVerified = ko.observable(false),
-  }: UserDetailsProps): void {
-    this.participant = participant;
-    this.isVerified = isVerified;
-    this.badge = badge;
-    this.isGroupAdmin = isGroupAdmin;
-    this.isSelfVerified = isSelfVerified;
-
-    amplify.publish(WebAppEvents.USER.UPDATE, this.participant().id);
+  viewModel: {
+    createViewModel(params: UserDetailsParams) {
+      return new UserDetails(params);
+    },
   },
 });

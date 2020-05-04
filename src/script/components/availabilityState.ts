@@ -28,6 +28,24 @@ interface AvailabilityStateParams {
   theme?: boolean;
 }
 
+class AvailabilityState {
+  readonly availability: () => Availability.Type;
+  readonly label: string;
+  readonly showArrow: boolean;
+  readonly theme: boolean;
+
+  constructor({availability, label, showArrow = false, theme = false}: AvailabilityStateParams) {
+    this.label = label;
+    this.showArrow = showArrow;
+    this.theme = theme;
+    this.availability = availability;
+  }
+
+  isAvailable = () => this.availability() === Availability.Type.AVAILABLE;
+  isAway = () => this.availability() === Availability.Type.AWAY;
+  isBusy = () => this.availability() === Availability.Type.BUSY;
+}
+
 ko.components.register('availability-state', {
   template: `
       <!-- ko if: isAvailable() -->
@@ -46,12 +64,9 @@ ko.components.register('availability-state', {
         <span class="availability-state-arrow"></span>
       <!-- /ko -->
         `,
-  viewModel: function ({availability, label, showArrow = false, theme = false}: AvailabilityStateParams): void {
-    this.isAvailable = () => availability() === Availability.Type.AVAILABLE;
-    this.isAway = () => availability() === Availability.Type.AWAY;
-    this.isBusy = () => availability() === Availability.Type.BUSY;
-    this.label = label;
-    this.showArrow = showArrow;
-    this.theme = theme;
+  viewModel: {
+    createViewModel(params: AvailabilityStateParams) {
+      return new AvailabilityState(params);
+    },
   },
 });

@@ -30,16 +30,21 @@ enum VIDEO_SIZE {
   QUARTER_SCREEN = 'quarter_screen',
 }
 
+interface GroupVideoGridParams {
+  minimized: boolean;
+  grid: ko.PureComputed<Grid>;
+  muted?: ko.Observable<boolean>;
+  selfUserId: string;
+}
+
 class GroupVideoGrid {
-  private readonly grid: ko.PureComputed<Grid>;
-  private readonly videoParticipants: ko.PureComputed<Participant[]>;
-  private readonly minimized: boolean;
-  public readonly muted: ko.Observable<boolean>;
-  public readonly selfUserId: string;
+  readonly grid: ko.PureComputed<Grid>;
+  readonly gridSubscription: ko.Subscription;
+  readonly minimized: boolean;
+  readonly muted: ko.Observable<boolean>;
+  readonly selfUserId: string;
+  readonly videoParticipants: ko.PureComputed<Participant[]>;
 
-  public readonly dispose: () => void;
-
-  // tslint:disable-next-line:typedef
   static get CONFIG() {
     return {
       CONTAIN_CLASS: 'group-video-grid__element-video--contain',
@@ -47,26 +52,19 @@ class GroupVideoGrid {
     };
   }
 
-  constructor(
-    {
-      minimized,
-      grid,
-      muted,
-      selfUserId,
-    }: {minimized: boolean; grid: ko.PureComputed<Grid>; muted: ko.Observable<boolean> | undefined; selfUserId: string},
-    rootElement: HTMLElement,
-  ) {
+  constructor({minimized, grid, muted, selfUserId}: GroupVideoGridParams, componentInfo: ko.components.ComponentInfo) {
     this.selfUserId = selfUserId;
-    this.scaleVideos = this.scaleVideos.bind(this, rootElement);
+    this.scaleVideos = this.scaleVideos.bind(this, componentInfo.element);
     this.grid = grid;
     this.muted = muted || ko.observable(false);
     this.videoParticipants = ko.pureComputed(() => this.grid().grid.filter(participant => !!participant));
 
     this.minimized = minimized;
     // scale videos when the grid is updated (on the next rendering cycle)
-    const gridSubscription = this.grid.subscribe(() => afterRender(this.scaleVideos));
-    this.dispose = () => gridSubscription.dispose();
+    this.gridSubscription = this.grid.subscribe(() => afterRender(this.scaleVideos));
   }
+
+  dispose = () => this.gridSubscription.dispose();
 
   hasBlackBackground(): boolean {
     const gridElementsCount = this.grid().grid.filter(participant => !!participant).length;
@@ -199,6 +197,8 @@ ko.components.register('group-video-grid', {
     </div>
   `,
   viewModel: {
-    createViewModel: (params: any, componentInfo: any) => new GroupVideoGrid(params, componentInfo.element),
+    createViewModel(params: GroupVideoGridParams, componentInfo: ko.components.ComponentInfo) {
+      return new GroupVideoGrid(params, componentInfo);
+    },
   },
 });

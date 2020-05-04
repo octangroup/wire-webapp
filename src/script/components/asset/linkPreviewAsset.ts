@@ -28,7 +28,7 @@ import {LinkPreview} from '../../entity/message/LinkPreview';
 import {LinkPreviewMetaDataType} from '../../links/LinkPreviewMetaDataType';
 import {Text} from '../../entity/message/Text';
 
-interface Params {
+interface LinkPreviewAssetComponentParams {
   message: ContentMessage | ko.Subscribable<ContentMessage>;
 
   /** Does the asset have a visible header? */
@@ -36,15 +36,15 @@ interface Params {
 }
 
 class LinkPreviewAssetComponent {
-  getDomainName: (url?: string) => string;
-  messageEntity: ContentMessage;
-  header: boolean;
-  preview: LinkPreview;
-  element: HTMLElement;
-  isTweet: boolean;
   author: string;
+  element: Node;
+  getDomainName: (url?: string) => string;
+  header: boolean;
+  isTweet: boolean;
+  messageEntity: ContentMessage;
+  preview: LinkPreview;
 
-  constructor({message, header = false}: Params, element: HTMLElement) {
+  constructor({message, header = false}: LinkPreviewAssetComponentParams, componentInfo: ko.components.ComponentInfo) {
     this.getDomainName = getDomainName;
 
     this.messageEntity = ko.unwrap(message);
@@ -52,7 +52,7 @@ class LinkPreviewAssetComponent {
 
     const [firstPreview] = (this.messageEntity.get_first_asset() as Text).previews();
     this.preview = firstPreview;
-    this.element = element;
+    this.element = componentInfo.element;
 
     const isTypeTweet = this.preview && this.preview.meta_data_type === LinkPreviewMetaDataType.TWEET;
     this.isTweet = isTypeTweet && isTweetUrl(this.preview.url);
@@ -116,8 +116,8 @@ ko.components.register('link-preview-asset', {
     <!-- /ko -->
   `,
   viewModel: {
-    createViewModel(params: Params, {element}: ko.components.ComponentInfo): LinkPreviewAssetComponent {
-      return new LinkPreviewAssetComponent(params, element as HTMLElement);
+    createViewModel(params: LinkPreviewAssetComponentParams, componentInfo: ko.components.ComponentInfo) {
+      return new LinkPreviewAssetComponent(params, componentInfo);
     },
   },
 });

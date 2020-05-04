@@ -19,7 +19,7 @@
 
 import ko from 'knockout';
 
-import {BasePanelViewModel, PanelViewModelProps} from './BasePanelViewModel';
+import {BasePanelViewModel, PanelViewModelParams} from './BasePanelViewModel';
 import {NOTIFICATION_STATE, getNotificationText} from '../../conversation/NotificationSetting';
 import {ConversationRepository} from '../../conversation/ConversationRepository';
 
@@ -33,7 +33,7 @@ export class NotificationsViewModel extends BasePanelViewModel {
   settings: NotificationSetting[];
   currentNotificationSetting: ko.Observable<number>;
 
-  constructor(params: PanelViewModelProps) {
+  constructor(params: PanelViewModelParams) {
     super(params);
 
     this.conversationRepository = params.repositories.conversation;
