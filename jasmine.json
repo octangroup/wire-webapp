@@ -1,0 +1,6 @@
+{
+  "random": true,
+  "spec_dir": "src/script",
+  "spec_files": ["main/globals.ts", "assets/AssetMetaDataBuilder.test.ts"],
+  "stopSpecOnExpectationFailure": true
+}
